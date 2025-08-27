@@ -19,10 +19,8 @@ import (
 
 func main() {
 
-	// Set up router and routes
-	router := gin.Default()
-	router.GET("/api/v1/health", health)
-
+	ginRouter := gin.Default()
+	router.initRouter(ginRouter)
 	err := godotenv.Load(".env")
 	if err != nil {
 		panic(err)
@@ -51,6 +49,7 @@ func main() {
 
 	// Run the router if all is good
 	router.Run()
+
 }
 
 func health(c *gin.Context) {

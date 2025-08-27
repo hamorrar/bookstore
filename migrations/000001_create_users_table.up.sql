@@ -6,3 +6,7 @@ create table users (
     user_created_at timestamptz CURRENT_TIMESTAMP,
     user_updated_at timestamptz
 );
+
+insert into users (user_email, user_password_hash, user_role) values ("testuser1@gmail.com", "testuser1password", "customer")
+insert into users (user_email, user_password_hash, user_role) values ("testuser2@gmail.com", "testuser2password", "customer")
+insert into users (user_email, user_password_hash, user_role) values ("testuser3@gmail.com", "testuser3password", "admin")
