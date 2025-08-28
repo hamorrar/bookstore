@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
-
-	"github.com/gin-gonic/gin"
+	"strconv"
 
 	"database/sql"
 
@@ -12,25 +12,38 @@ import (
 
 	"github.com/joho/godotenv"
 
+	"github.com/hamorrar/bookstore/internal/database"
+
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/hamorrar/bookstore/src/router"
 )
 
-func main() {
+type application struct {
+	port      int
+	jwtSecret string
+	models    database.Models
+}
 
-	ginRouter := gin.Default()
-	router.InitRouter(ginRouter)
+func main() {
 
 	DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME := initEnv()
 
 	db := connectDB(DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME)
 
-	fmt.Println("Database:", db)
+	defer db.Close()
 
-	// Run the router
-	ginRouter.Run()
+	server_Port, _ := strconv.Atoi(os.Getenv("PORT"))
 
+	models := database.NewModels(db)
+	app := &application{
+		port:      server_Port,
+		jwtSecret: os.Getenv("SECRET_KEY"),
+		models:    models,
+	}
+
+	if err := app.serve(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func initEnv() (string, string, string, string, string) {
@@ -56,7 +69,6 @@ func connectDB(DB_HOST string, DB_PORT string, DB_USER string, DB_PASSWORD strin
 	if err != nil {
 		panic(err)
 	}
-	defer db.Close()
 
 	err = db.Ping()
 	if err != nil {
