@@ -24,7 +24,9 @@ func main() {
 
 	DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME := initEnv()
 
-	connectDB(DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME)
+	db := connectDB(DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME)
+
+	fmt.Println("Database:", db)
 
 	// Run the router
 	ginRouter.Run()
@@ -46,7 +48,7 @@ func initEnv() (string, string, string, string, string) {
 	return DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
 }
 
-func connectDB(DB_HOST string, DB_PORT string, DB_USER string, DB_PASSWORD string, DB_NAME string) {
+func connectDB(DB_HOST string, DB_PORT string, DB_USER string, DB_PASSWORD string, DB_NAME string) *sql.DB {
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+"password=%s dbname=%s sslmode=disable",
 		DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME)
 
@@ -60,4 +62,6 @@ func connectDB(DB_HOST string, DB_PORT string, DB_USER string, DB_PASSWORD strin
 	if err != nil {
 		panic(err)
 	}
+
+	return db
 }
