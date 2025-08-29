@@ -26,13 +26,23 @@ type application struct {
 
 func main() {
 
-	DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME := initEnv()
+	initDBEnv()
+	psqlInfo := os.Getenv("PSQL_INFO")
+	fmt.Println("main api psqlinfo: ", psqlInfo)
 
-	db := connectDB(DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME)
+	server_Port, _ := strconv.Atoi(os.Getenv("PORT"))
+
+	db, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	defer db.Close()
 
-	server_Port, _ := strconv.Atoi(os.Getenv("PORT"))
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
 
 	models := database.NewModels(db)
 	app := &application{
@@ -46,12 +56,20 @@ func main() {
 	}
 }
 
-func initEnv() (string, string, string, string, string) {
+func initDBEnv() {
 	err := godotenv.Load(".env")
 	if err != nil {
 		panic(err)
 	}
 
+	DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME := getDBEnv()
+
+	psqlInfo := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable",
+		DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD)
+	os.Setenv("PSQL_INFO", psqlInfo)
+}
+
+func getDBEnv() (string, string, string, string, string) {
 	DB_HOST := os.Getenv("DB_HOST")
 	DB_PORT := os.Getenv("DB_PORT")
 	DB_USER := os.Getenv("DB_USER")
@@ -59,21 +77,5 @@ func initEnv() (string, string, string, string, string) {
 	DB_NAME := os.Getenv("DB_NAME")
 
 	return DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
-}
 
-func connectDB(DB_HOST string, DB_PORT string, DB_USER string, DB_PASSWORD string, DB_NAME string) *sql.DB {
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+"password=%s dbname=%s sslmode=disable",
-		DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME)
-
-	db, err := sql.Open("postgres", psqlInfo)
-	if err != nil {
-		panic(err)
-	}
-
-	err = db.Ping()
-	if err != nil {
-		panic(err)
-	}
-
-	return db
 }
