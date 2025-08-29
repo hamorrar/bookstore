@@ -21,7 +21,7 @@ func (m *BookModel) CreateBook(book *Book) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := "insert into books (title, author, price) values ($1, $2, $3) returning id"
+	query := "insert into books (book_title, book_author, book_price) values ($1, $2, $3) returning book_id"
 
 	return m.DB.QueryRowContext(ctx, query, book.Title, book.Author, book.Price).Scan(&book.Id)
 }
@@ -30,7 +30,7 @@ func (m *BookModel) DeleteBook(id int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := "delete from books where id = $1"
+	query := "delete from books where book_id = $1"
 
 	_, err := m.DB.ExecContext(ctx, query, id)
 	if err != nil {
@@ -43,7 +43,7 @@ func (m *BookModel) GetBook(id int) (*Book, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := "select * from books where id = $1"
+	query := "select * from books where book_id = $1"
 
 	var book Book
 
