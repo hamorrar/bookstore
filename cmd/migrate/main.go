@@ -28,10 +28,7 @@ func main() {
 	fmt.Println("psql info: ", psqlInfo)
 	fmt.Println("psql url: ", psqlURL)
 
-	// psqlURL2 := "postgres://localhost:5432/database?sslmode=disable"
-	// db, err := sql.Open("postgres", psqlInfo)
 	db, err := sql.Open("postgres", psqlURL)
-	// db, err := sql.Open("postgres", psqlURL2)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -47,21 +44,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// fSrc, err := (&file.File{}).Open("cmd/migrate/migrations")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// fmt.Println("--fsrc:", fSrc)
-
 	m, err := migrate.NewWithDatabaseInstance("file://cmd/migrate/migrations", "postgres", driver)
 	fmt.Println("--m:", m)
 
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// m.Up()
 
 	direction := os.Args[1]
 	switch direction {
@@ -77,7 +65,7 @@ func main() {
 	default:
 		log.Fatal("Invalid direction. Use 'up' or 'down'.")
 	}
-	// defer db.Close()
+	defer db.Close()
 
 }
 
