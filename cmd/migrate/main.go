@@ -21,12 +21,7 @@ func main() {
 	}
 
 	initDBEnv()
-	psqlInfo := os.Getenv("PSQL_INFO")
 	psqlURL := os.Getenv("DB_URL")
-
-	fmt.Println("in migrate main")
-	fmt.Println("psql info: ", psqlInfo)
-	fmt.Println("psql url: ", psqlURL)
 
 	db, err := sql.Open("postgres", psqlURL)
 	if err != nil {
@@ -35,7 +30,6 @@ func main() {
 
 	err = db.Ping()
 	if err != nil {
-		fmt.Println("--PING ERROR")
 		log.Fatal(err)
 	}
 
@@ -45,8 +39,6 @@ func main() {
 	}
 
 	m, err := migrate.NewWithDatabaseInstance("file://cmd/migrate/migrations", "postgres", driver)
-	fmt.Println("--m:", m)
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -55,7 +47,6 @@ func main() {
 	switch direction {
 	case "up":
 		if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-			fmt.Println("UP ERR")
 			log.Fatal(err)
 		}
 	case "down":
@@ -66,7 +57,6 @@ func main() {
 		log.Fatal("Invalid direction. Use 'up' or 'down'.")
 	}
 	defer db.Close()
-
 }
 
 func initDBEnv() {
@@ -77,11 +67,8 @@ func initDBEnv() {
 
 	DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME := getDBEnv()
 
-	psqlInfo := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable",
-		DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD)
-	os.Setenv("PSQL_INFO", psqlInfo)
-
-	os.Setenv("DB_URL", "postgres://postgres:postgres@localhost:5432/bookstore?sslmode=disable")
+	DB_URL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME)
+	os.Setenv("DB_URL", DB_URL)
 }
 
 func getDBEnv() (string, string, string, string, string) {

@@ -1,6 +1,16 @@
 # bookstore
 
-## To Set Up Migration (up and down)
+## Set Up
+
+### Download source code with SSH
+```bash
+git clone git@github.com:hamorrar/bookstore.git; cd bookstore
+```
+
+### Install Go Dependencies
+```bash
+go mod tidy
+```
 
 ### Install Go Migrate
 ```bash
@@ -8,10 +18,12 @@ curl -s https://packagecloud.io/install/repositories/golang-migrate/migrate/scri
 sudo apt-get update
 sudo apt-get install -y migrate
 ```
-### Set Database Environment Variable
+
+### Log into bookstore DB in a terminal
 ```bash
-export DB_URL="postgres://postgres:postgres@localhost:5432/bookstore?sslmode=disable"
+psql -U postgres -h localhost -d bookstore
 ```
+
 ### Create migration files
 ```bash
 migrate create -ext sql -dir migrations -seq create_users_table
@@ -20,11 +32,44 @@ migrate create -ext sql -dir migrations -seq create_orders_table
 ```
 
 ### Apply Migration Up
+can replace up/down as needed
 ```bash
-migrate -path migrations -database "postgresql://username:password@localhost:5432/database_name?sslmode=disable" up
+migrate -path migrations -database $DB_URL up
+```
+or
+```bash
+go run ./cmd/migrate/main.go up
 ```
 
-## Port Check up
+### Start Go Server
+```bash
+go run ./cmd/api
+```
+
+## To Run from the root directory
+1. Apply up migrations as above
+1. start the go server
+1. send client requests with ``curl``. Examples found in [curl.txt](./curl.txt)
+
+## Misc
+
+### Port Check up
 ```bash
 sudo ss -tulnp | grep :<PORT_NUMBER>
+```
+
+### Migration Errors
+#### Version or Dirty table
+```bash
+migrate -path "cmd/migrate/migrations/" -database $DB_URL force 1
+```
+
+#### Drop migration table in psql terminal
+```sql
+drop table schema_migrations;
+```
+
+### Check migration table version/dirty
+```sql
+select * from schema_migrations;
 ```
