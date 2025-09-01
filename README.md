@@ -73,3 +73,7 @@ drop table schema_migrations;
 ```sql
 select * from schema_migrations;
 ```
+
+## Ideas
+- create a simulation of a big processing jobs by using a timer to wait for a random 1-5 second wait per "task" for 10 tasks to practice making a "/api/check/:jobid" endpoint to get the status of my job.
+- for pagination practice, copy paste 10 curl requests to add books to paginate thru a large get request, 2 books per page
