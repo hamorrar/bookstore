@@ -94,3 +94,18 @@ func (m *UserModel) GetAllUsers() ([]*User, error) {
 
 	return users, nil
 }
+
+func (m *UserModel) UpdateUser(user *User) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := "UPDATE users SET user_email = $1, user_password = $2, user_role = $3, where user_id = $4"
+
+	_, err := m.DB.ExecContext(ctx, query, user.Email, user.Password, user.Role, user.Id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

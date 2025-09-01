@@ -92,3 +92,18 @@ func (m *OrderModel) GetAllOrders() ([]*Order, error) {
 
 	return orders, nil
 }
+
+func (m *OrderModel) UpdateOrder(order *Order) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := "UPDATE orders SET order_user_id = $1, order_status = $2, order_total_price = $3 WHERE id = $4"
+
+	_, err := m.DB.ExecContext(ctx, query, order.User_Id, order.Status, order.Total_Price, order.Id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

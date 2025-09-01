@@ -92,3 +92,17 @@ func (m *BookModel) GetAllBooks() ([]*Book, error) {
 
 	return books, nil
 }
+
+func (m *BookModel) UpdateBook(book *Book) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := "update books set book_title = $1, book_author = $2, book_price = $3 where book_id = $4"
+
+	_, err := m.DB.ExecContext(ctx, query, book.Title, book.Author, book.Price, book.Id)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}

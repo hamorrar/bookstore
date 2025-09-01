@@ -73,3 +73,42 @@ func (app *application) deleteBook(c *gin.Context) {
 
 	c.JSON(http.StatusNoContent, nil)
 }
+
+func (app *application) updateBook(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid book ID"})
+		return
+	}
+
+	existingBook, err := app.models.Books.GetBook(id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get book"})
+		return
+	}
+
+	if existingBook == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "book not found"})
+		return
+	}
+
+	updatedBook := &database.Book{}
+	updatedBook.Id = id
+
+	if err := c.ShouldBindJSON(updatedBook); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	updatedBook.Id = id
+
+	if err := app.models.Books.UpdateBook(updatedBook); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update book"})
+		return
+	}
+
+	c.JSON(http.StatusOK, updatedBook)
+
+}

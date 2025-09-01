@@ -73,3 +73,40 @@ func (app *application) deleteUser(c *gin.Context) {
 
 	c.JSON(http.StatusNoContent, nil)
 }
+
+func (app *application) updateUser(c *gin.Context) {
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	existingUser, err := app.models.Users.GetUser(id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retreive user"})
+		return
+	}
+
+	if existingUser == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	updatedUser := &database.User{}
+
+	if err := c.ShouldBindJSON(updatedUser); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	updatedUser.Id = id
+
+	if err := app.models.Users.UpdateUser(updatedUser); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, updatedUser)
+}

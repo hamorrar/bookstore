@@ -76,3 +76,32 @@ func (app *application) deleteOrder(c *gin.Context) {
 
 	c.JSON(http.StatusNoContent, nil)
 }
+
+func (app *application) updateOrder(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid order ID"})
+		return
+	}
+
+	existingOrder, err := app.models.Orders.GetOrder(id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get order"})
+		return
+	}
+
+	if existingOrder == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
+		return
+	}
+
+	updatedOrder := &database.Order{}
+	updatedOrder.Id = id
+
+	if err := app.models.Orders.UpdateOrder(updatedOrder); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update event"})
+		return
+	}
+	c.JSON(http.StatusOK, updatedOrder)
+}
