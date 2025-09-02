@@ -28,8 +28,6 @@ func main() {
 
 	initDBEnv()
 	psqlInfo := os.Getenv("PSQL_INFO")
-	fmt.Println("main api psqlinfo: ", psqlInfo)
-
 	server_Port, _ := strconv.Atoi(os.Getenv("PORT"))
 
 	db, err := sql.Open("postgres", psqlInfo)
