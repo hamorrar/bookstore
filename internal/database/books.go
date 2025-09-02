@@ -14,7 +14,7 @@ type Book struct {
 	Id     int    `json:"id"`
 	Title  string `json:"title" binding:"required,min=3"`
 	Author string `json:"author" binding:"required,min=3"`
-	Price  int    `json:"price"`
+	Price  int    `json:"price" binding:"required"`
 }
 
 func (m *BookModel) CreateBook(book *Book) error {
@@ -47,7 +47,7 @@ func (m *BookModel) GetBook(id int) (*Book, error) {
 
 	var book Book
 
-	err := m.DB.QueryRowContext(ctx, query, id).Scan(&book.Id, &book.Author, &book.Price, &book.Title)
+	err := m.DB.QueryRowContext(ctx, query, id).Scan(&book.Id, &book.Title, &book.Author, &book.Price)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -77,7 +77,7 @@ func (m *BookModel) GetAllBooks() ([]*Book, error) {
 	for rows.Next() {
 		var book Book
 
-		err := rows.Scan(&book.Id, &book.Author, &book.Price, &book.Title)
+		err := rows.Scan(&book.Id, &book.Title, &book.Author, &book.Price)
 
 		if err != nil {
 			return nil, err

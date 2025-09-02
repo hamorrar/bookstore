@@ -12,9 +12,9 @@ type UserModel struct {
 
 type User struct {
 	Id       int    `json:"id"`
-	Email    string `json:"email"`
+	Email    string `json:"email" binding:"required"`
 	Password string `json:"-"`
-	Role     string `json:"role"`
+	Role     string `json:"role" binding:"required"`
 }
 
 func (m *UserModel) CreateUser(user *User) error {
@@ -25,7 +25,12 @@ func (m *UserModel) CreateUser(user *User) error {
 
 	// TODO: hash the password
 
-	return m.DB.QueryRowContext(ctx, query, user.Email, user.Password, user.Role).Scan(&user.Id)
+	err := m.DB.QueryRowContext(ctx, query, user.Email, user.Password, user.Role).Scan(&user.Id)
+
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (m *UserModel) DeleteUser(id int) error {
@@ -99,7 +104,7 @@ func (m *UserModel) UpdateUser(user *User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := "UPDATE users SET user_email = $1, user_password = $2, user_role = $3, where user_id = $4"
+	query := "UPDATE users SET user_email = $1, user_password = $2, user_role = $3 where user_id = $4"
 
 	_, err := m.DB.ExecContext(ctx, query, user.Email, user.Password, user.Role, user.Id)
 

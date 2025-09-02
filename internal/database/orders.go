@@ -13,17 +13,21 @@ type OrderModel struct {
 type Order struct {
 	Id          int    `json:"id"`
 	User_Id     int    `json:"user_id" binding:"required"`
-	Status      string `json:"status"`
-	Total_Price int    `json:"total_price"`
+	Status      string `json:"status" binding:"required"`
+	Total_Price int    `json:"total_price" binding:"required"`
 }
 
 func (m *OrderModel) CreateOrder(order *Order) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := "insert into orders (order_user_id, order_status, order_total_price) values ($1, $2, $3) returning user_id"
+	query := "insert into orders (order_user_id, order_status, order_total_price) values ($1, $2, $3) returning order_id"
 
-	return m.DB.QueryRowContext(ctx, query, order.User_Id, order.Status, order.Total_Price).Scan(&order.Id)
+	err := m.DB.QueryRowContext(ctx, query, order.User_Id, order.Status, order.Total_Price).Scan(&order.Id)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (m *OrderModel) DeleteOrder(id int) error {
@@ -43,11 +47,11 @@ func (m *OrderModel) GetOrder(id int) (*Order, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := "select * from orders where user_id = $1"
+	query := "select * from orders where order_id = $1"
 
 	var order Order
 
-	err := m.DB.QueryRowContext(ctx, query, id).Scan(&order.Id, &order.User_Id, &order.Total_Price)
+	err := m.DB.QueryRowContext(ctx, query, id).Scan(&order.Id, &order.User_Id, &order.Status, &order.Total_Price)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -77,7 +81,7 @@ func (m *OrderModel) GetAllOrders() ([]*Order, error) {
 	for rows.Next() {
 		var order Order
 
-		err := rows.Scan(&order.Id, &order.User_Id, &order.Total_Price)
+		err := rows.Scan(&order.Id, &order.User_Id, &order.Status, &order.Total_Price)
 
 		if err != nil {
 			return nil, err
@@ -97,7 +101,7 @@ func (m *OrderModel) UpdateOrder(order *Order) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := "UPDATE orders SET order_user_id = $1, order_status = $2, order_total_price = $3 WHERE id = $4"
+	query := "UPDATE orders SET order_user_id = $1, order_status = $2, order_total_price = $3 WHERE order_id = $4"
 
 	_, err := m.DB.ExecContext(ctx, query, order.User_Id, order.Status, order.Total_Price, order.Id)
 

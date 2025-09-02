@@ -16,9 +16,6 @@ func (app *application) createOrder(c *gin.Context) {
 		return
 	}
 
-	user := app.GetUserFromContext(c)
-	order.User_Id = user.Id
-
 	err := app.models.Orders.CreateOrder(&order)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create order"})
@@ -97,6 +94,11 @@ func (app *application) updateOrder(c *gin.Context) {
 	}
 
 	updatedOrder := &database.Order{}
+	if err := c.ShouldBindJSON(updatedOrder); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	updatedOrder.Id = id
 
 	if err := app.models.Orders.UpdateOrder(updatedOrder); err != nil {
