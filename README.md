@@ -49,7 +49,7 @@ go run ./cmd/api
 ## To Run from the root directory
 1. Apply up migrations as above
 1. start the go server
-1. send client requests with ``curl``. Examples found in [curl.txt](./curl.txt)
+1. send client requests with ``curl``. Examples found in [the testing directory](./testing)
 
 ## Misc
 
