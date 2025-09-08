@@ -20,7 +20,7 @@ func (app *application) routes() http.Handler {
 		v1.DELETE("/books/:id", app.deleteBook)
 		v1.PUT("/books/:id", app.updateBook)
 
-		v1.POST("/users", app.createUser)
+		v1.POST("/users", app.registerUser)
 		v1.GET("/users", app.getAllUsers)
 		v1.GET("/users/:id", app.getUser)
 		v1.DELETE("/users/:id", app.deleteUser)

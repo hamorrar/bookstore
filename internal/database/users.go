@@ -23,8 +23,6 @@ func (m *UserModel) CreateUser(user *User) error {
 
 	query := "insert into users (user_email, user_password, user_role) values ($1, $2, $3) returning user_id"
 
-	// TODO: hash the password
-
 	err := m.DB.QueryRowContext(ctx, query, user.Email, user.Password, user.Role).Scan(&user.Id)
 
 	if err != nil {
