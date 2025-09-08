@@ -2,21 +2,23 @@ package main
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/hamorrar/bookstore/internal/database"
 	"golang.org/x/crypto/bcrypt"
 )
 
-// type loginRequest struct {
-// 	Email    string `json:"email" binding:"required,email"`
-// 	Password string `json:"password" binding:"required,min=4"`
-// }
+type loginRequest struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=4"`
+}
 
-// type loginResponse struct {
-// 	Token  string `json:"token"`
-// 	UserId int    `json:"userId"`
-// }
+type loginResponse struct {
+	Token  string `json:"token"`
+	UserId int    `json:"userId"`
+}
 
 type registerRequest struct {
 	Email    string `json:"email" binding:"required,email"`
@@ -53,55 +55,40 @@ func (app *application) registerUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, user)
 }
 
-// func createToken(username string) (string, error) {
-// 	// Create a new JWT token with claims
-// 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-// 		"sub": username,                         // Subject (user identifier)
-// 		"iss": "bookstore",                      // Issuer
-// 		"aud": getRole(username),                // Audience (user role)
-// 		"exp": time.Now().Add(time.Hour).Unix(), // Expiration time
-// 		"iat": time.Now().Unix(),                // Issued at
-// 	})
+func (app *application) login(c *gin.Context) {
+	var auth loginRequest
+	if err := c.ShouldBindJSON(&auth); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-// 	fmt.Printf("Token claims added: %+v\n", claims)
+	existingUser, err := app.models.Users.GetUserByEmail(auth.Email)
+	if existingUser == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found with this email"})
+		return
+	}
 
-// 	tokenString, err := claims.SignedString(os.Getenv("SECRET_KEY"))
-// 	if err != nil {
-// 		return "", err
-// 	}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not get user to login"})
+		return
+	}
 
-// 	return tokenString, nil
-// }
+	err = bcrypt.CompareHashAndPassword([]byte(existingUser.Password), []byte(auth.Password))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+		return
+	}
 
-// func getRole(username string) string {
-// 	switch username {
-// 	case "testuser1@gmail.com", "testuser2@gmail.com":
-// 		return "customer"
-// 	case "testuser3@gmail.com":
-// 		return "admin"
-// 	}
-// 	return ""
-// }
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userId": existingUser.Id,
+		"expr":   time.Now().Add(time.Minute * 5).Unix(),
+	})
 
-// func Login(c *gin.Context) {
-// 	username := c.PostForm("username")
-// 	password := c.PostForm("password")
+	tokenString, err := token.SignedString([]byte(app.jwtSecret))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating token"})
+		return
+	}
 
-// 	// Dummy credential check
-// 	if (username == "testuser1@gmail.com" && password == "testuser1password") || (username == "testuser3@gmail.com" && password == "testuser3password") {
-// 		tokenString, err := createToken(username)
-// 		if err != nil {
-// 			c.String(http.StatusInternalServerError, "Error creating token")
-// 			return
-// 		}
-
-// 		fmt.Println(tokenString)
-
-// 		// 	loggedInUser := username
-// 		// 	fmt.Printf("Token created: %s\n", tokenString)
-// 		// 	c.SetCookie("token", tokenString, 3600, "/", "localhost", false, true)
-// 		// 	c.Redirect(http.StatusSeeOther, "/")
-// 		// } else {
-// 		// 	c.String(http.StatusUnauthorized, "Invalid credentials")
-// 	}
-// }
+	c.JSON(http.StatusOK, loginResponse{Token: tokenString, UserId: existingUser.Id})
+}

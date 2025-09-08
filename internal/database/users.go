@@ -44,15 +44,13 @@ func (m *UserModel) DeleteUser(id int) error {
 	return nil
 }
 
-func (m *UserModel) GetUser(id int) (*User, error) {
+func (m *UserModel) getUser(query string, args ...interface{}) (*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := "select * from users where user_id = $1"
-
 	var user User
 
-	err := m.DB.QueryRowContext(ctx, query, id).Scan(&user.Id, &user.Email, &user.Password, &user.Role)
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&user.Id, &user.Email, &user.Password, &user.Role)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -96,6 +94,16 @@ func (m *UserModel) GetAllUsers() ([]*User, error) {
 	}
 
 	return users, nil
+}
+
+func (m *UserModel) GetUserByEmail(email string) (*User, error) {
+	query := "select * from users where email = $1"
+	return m.getUser(query, email)
+}
+
+func (m *UserModel) GetUserById(id int) (*User, error) {
+	query := "select * from users where id = $1"
+	return m.getUser(query, id)
 }
 
 func (m *UserModel) UpdateUser(user *User) error {

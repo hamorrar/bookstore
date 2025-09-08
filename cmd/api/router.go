@@ -14,25 +14,34 @@ func (app *application) routes() http.Handler {
 	{
 		v1.GET("/ping", ping)
 
-		v1.POST("/books", app.createBook)
+		v1.POST("/auth/register", app.registerUser)
+		v1.POST("/auth/login", app.login)
+
 		v1.GET("/books", app.getAllBooks)
 		v1.GET("/books/:id", app.getBook)
-		v1.DELETE("/books/:id", app.deleteBook)
-		v1.PUT("/books/:id", app.updateBook)
 
-		v1.POST("/users", app.registerUser)
-		v1.GET("/users", app.getAllUsers)
-		v1.GET("/users/:id", app.getUser)
-		v1.DELETE("/users/:id", app.deleteUser)
-		v1.PUT("/users/:id", app.updateUser)
-
-		v1.POST("/orders", app.createOrder)
 		v1.GET("/orders", app.getAllOrders)
 		v1.GET("/orders/:id", app.getOrder)
-		v1.DELETE("/orders/:id", app.deleteOrder)
-		v1.PUT("/orders/:id", app.updateOrder)
-
 	}
+
+	authGroup := v1.Group("/")
+	authGroup.Use(app.AuthMiddleware())
+
+	{
+		// authGroup.GET("/users", app.getAllUsers)
+		// authGroup.GET("/users/:id", app.getUser)
+		authGroup.PUT("/users/:id", app.updateUser)
+		authGroup.DELETE("/users/:id", app.deleteUser)
+
+		authGroup.POST("/books", app.createBook)
+		authGroup.PUT("/books/:id", app.updateBook)
+		authGroup.DELETE("/books/:id", app.deleteBook)
+
+		authGroup.POST("/orders", app.createOrder)
+		authGroup.PUT("/orders/:id", app.updateOrder)
+		authGroup.DELETE("/orders/:id", app.deleteOrder)
+	}
+
 	return g
 }
 
