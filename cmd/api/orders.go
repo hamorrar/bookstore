@@ -25,14 +25,47 @@ func (app *application) createOrder(c *gin.Context) {
 	c.JSON(http.StatusCreated, order)
 }
 
-func (app *application) getAllOrders(c *gin.Context) {
-	orders, err := app.models.Orders.GetAllOrders()
+func (app *application) getPageOfOrders(c *gin.Context) {
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "2"))
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+
+	orders, err := app.models.Orders.GetPageOfOrders(limit, page)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get all orders"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to get all orders page by page."})
 		return
 	}
 	c.JSON(http.StatusOK, orders)
+}
+
+func (app *application) getAllOrders(c *gin.Context) {
+	user := app.GetUserFromContext(c)
+	if user.Role != "Admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized to get all orders"})
+		return
+	}
+
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "2"))
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+
+	var allOrders []*database.Order
+
+	for {
+		orders, err := app.models.Orders.GetPageOfOrders(limit, page)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to get all orders page by page."})
+			return
+		}
+
+		allOrders = append(allOrders, orders...)
+		if len(orders) < limit {
+			break
+		}
+		page++
+
+	}
+
+	c.JSON(http.StatusOK, allOrders)
 }
 
 func (app *application) getOrder(c *gin.Context) {
@@ -66,6 +99,24 @@ func (app *application) deleteOrder(c *gin.Context) {
 		return
 	}
 
+	user := app.GetUserFromContext(c)
+	existingOrder, err := app.models.Orders.GetOrder(id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get order to delete"})
+		return
+	}
+
+	if existingOrder == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Order not found to delete"})
+		return
+	}
+
+	if existingOrder.User_Id != user.Id || user.Role != "Admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized to delete this order"})
+		return
+	}
+
 	if err := app.models.Orders.DeleteOrder(id); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete order"})
 		return
@@ -81,15 +132,21 @@ func (app *application) updateOrder(c *gin.Context) {
 		return
 	}
 
+	user := app.GetUserFromContext(c)
 	existingOrder, err := app.models.Orders.GetOrder(id)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get order"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get order to update"})
 		return
 	}
 
 	if existingOrder == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Order not found to update"})
+		return
+	}
+
+	if existingOrder.User_Id != user.Id || user.Role != "Admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized to update this order"})
 		return
 	}
 

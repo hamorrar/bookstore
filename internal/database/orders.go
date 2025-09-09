@@ -62,6 +62,51 @@ func (m *OrderModel) GetOrder(id int) (*Order, error) {
 	return &order, nil
 }
 
+func (m *OrderModel) GetPageOfOrders(limit int, page int) ([]*Order, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	if limit <= 0 {
+		limit = 2
+	}
+
+	if page <= 0 {
+		page = 1
+	}
+
+	offset := (page - 1) * limit
+
+	query := "select * from orders order by order_id limit $1 offset $2"
+
+	rows, err := m.DB.QueryContext(ctx, query, limit, offset)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	orders := []*Order{}
+
+	for rows.Next() {
+		var order Order
+
+		err := rows.Scan(&order.Id, &order.User_Id, &order.Status, &order.Total_Price)
+
+		if err != nil {
+			return nil, err
+		}
+
+		orders = append(orders, &order)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return orders, nil
+}
+
 func (m *OrderModel) GetAllOrders() ([]*Order, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

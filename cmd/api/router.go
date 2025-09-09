@@ -19,9 +19,6 @@ func (app *application) routes() http.Handler {
 
 		v1.GET("/books/:id", app.getBook)
 		v1.GET("/books", app.getPageOfBooks)
-
-		v1.GET("/orders", app.getAllOrders)
-		v1.GET("/orders/:id", app.getOrder)
 	}
 
 	authGroup := v1.Group("/")
@@ -38,6 +35,8 @@ func (app *application) routes() http.Handler {
 		authGroup.PUT("/books/:id", app.updateBook)
 		authGroup.DELETE("/books/:id", app.deleteBook)
 
+		authGroup.GET("/orders/all", app.getAllOrders)
+		authGroup.GET("/orders/:id", app.getOrder)
 		authGroup.POST("/orders", app.createOrder)
 		authGroup.PUT("/orders/:id", app.updateOrder)
 		authGroup.DELETE("/orders/:id", app.deleteOrder)
