@@ -28,8 +28,8 @@ func (app *application) routes() http.Handler {
 	authGroup.Use(app.AuthMiddleware())
 
 	{
-		// authGroup.GET("/users", app.getAllUsers)
-		// authGroup.GET("/users/:id", app.getUser)
+		authGroup.GET("/users/all", app.getAllUsers)
+		authGroup.GET("/users/:id", app.getUser)
 		authGroup.PUT("/users/:id", app.updateUser)
 		authGroup.DELETE("/users/:id", app.deleteUser)
 

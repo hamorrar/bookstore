@@ -63,6 +63,51 @@ func (m *UserModel) getUser(query string, args ...interface{}) (*User, error) {
 	return &user, nil
 }
 
+func (m *UserModel) GetPageOfUsers(limit int, page int) ([]*User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	if limit <= 0 {
+		limit = 2
+	}
+
+	if page <= 0 {
+		page = 1
+	}
+
+	offset := (page - 1) * limit
+
+	query := "select * from users order by user_id limit $1 offset $2"
+
+	rows, err := m.DB.QueryContext(ctx, query, limit, offset)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	users := []*User{}
+
+	for rows.Next() {
+		var user User
+
+		err := rows.Scan(&user.Id, &user.Email, &user.Password, &user.Role)
+
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, &user)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
 func (m *UserModel) GetAllUsers() ([]*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

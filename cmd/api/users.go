@@ -8,59 +8,70 @@ import (
 	"github.com/hamorrar/bookstore/internal/database"
 )
 
-// func (app *application) createUser(c *gin.Context) {
-// 	var user database.User
+func (app *application) getAllUsers(c *gin.Context) {
+	user := app.GetUserFromContext(c)
+	if user.Role != "Admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized to get all users"})
+		return
+	}
 
-// 	if err := c.ShouldBindJSON(&user); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		return
-// 	}
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "2"))
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 
-// 	err := app.models.Users.CreateUser(&user)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user"})
-// 		return
-// 	}
+	var allUsers []*database.User
 
-// 	c.JSON(http.StatusCreated, user)
-// }
+	for {
+		books, err := app.models.Users.GetPageOfUsers(limit, page)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to get all users page by page."})
+			return
+		}
 
-// func (app *application) getAllUsers(c *gin.Context) {
-// 	users, err := app.models.Users.GetAllUsers()
+		allUsers = append(allUsers, books...)
+		if len(allUsers) < limit {
+			break
+		}
+		page++
+	}
 
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get all users"})
-// 		return
-// 	}
-// 	c.JSON(http.StatusOK, users)
-// }
+	c.JSON(http.StatusOK, allUsers)
+}
 
-// func (app *application) getUser(c *gin.Context) {
-// 	id, err := strconv.Atoi(c.Param("id"))
-
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
-// 		return
-// 	}
-
-// 	user, err := app.models.Users.GetUserById(id)
-// 	if user == nil {
-// 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-// 		return
-// 	}
-
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user"})
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, user)
-
-// }
-
-func (app *application) deleteUser(c *gin.Context) {
+func (app *application) getUser(c *gin.Context) {
+	userCtx := app.GetUserFromContext(c)
+	if userCtx.Role != "Customer" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized to get all users"})
+		return
+	}
 	id, err := strconv.Atoi(c.Param("id"))
 
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	user, err := app.models.Users.GetUserById(id)
+	if user == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
+func (app *application) deleteUser(c *gin.Context) {
+	user := app.GetUserFromContext(c)
+	if user.Role != "Admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized to delete user"})
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
@@ -75,6 +86,11 @@ func (app *application) deleteUser(c *gin.Context) {
 }
 
 func (app *application) updateUser(c *gin.Context) {
+	user := app.GetUserFromContext(c)
+	if user.Role != "Admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized to get all users"})
+		return
+	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -83,7 +99,6 @@ func (app *application) updateUser(c *gin.Context) {
 	}
 
 	existingUser, err := app.models.Users.GetUserById(id)
-
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retreive user"})
 		return
@@ -95,7 +110,6 @@ func (app *application) updateUser(c *gin.Context) {
 	}
 
 	updatedUser := &database.User{}
-
 	if err := c.ShouldBindJSON(updatedUser); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
