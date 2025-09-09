@@ -58,13 +58,23 @@ func (m *BookModel) GetBook(id int) (*Book, error) {
 	return &book, nil
 }
 
-func (m *BookModel) GetAllBooks() ([]*Book, error) {
+func (m *BookModel) GetPageOfBooks(limit int, page int) ([]*Book, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := "select * from books"
+	if limit <= 0 {
+		limit = 2
+	}
 
-	rows, err := m.DB.QueryContext(ctx, query)
+	if page <= 0 {
+		page = 1
+	}
+
+	offset := (page - 1) * limit
+
+	query := "select * from books order by book_id limit $1 offset $2"
+
+	rows, err := m.DB.QueryContext(ctx, query, limit, offset)
 
 	if err != nil {
 		return nil, err

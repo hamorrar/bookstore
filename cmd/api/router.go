@@ -17,8 +17,8 @@ func (app *application) routes() http.Handler {
 		v1.POST("/auth/register", app.registerUser)
 		v1.POST("/auth/login", app.login)
 
-		v1.GET("/books", app.getAllBooks)
 		v1.GET("/books/:id", app.getBook)
+		v1.GET("/books", app.getPageOfBooks)
 
 		v1.GET("/orders", app.getAllOrders)
 		v1.GET("/orders/:id", app.getOrder)
@@ -33,6 +33,7 @@ func (app *application) routes() http.Handler {
 		authGroup.PUT("/users/:id", app.updateUser)
 		authGroup.DELETE("/users/:id", app.deleteUser)
 
+		authGroup.GET("/books/all", app.getAllBooks)
 		authGroup.POST("/books", app.createBook)
 		authGroup.PUT("/books/:id", app.updateBook)
 		authGroup.DELETE("/books/:id", app.deleteBook)
