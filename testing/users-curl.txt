@@ -10,12 +10,31 @@ curl -X POST \
 -w "\nHTTP Status: %{http_code}\n" \
 http://localhost:8080/api/v1/auth/register
 
+curl -X POST \
+-H "Content-Type: application/json" \
+-d '{
+  "email": "user2@gmail.com",
+  "password": "password2",
+  "role": "Admin"
+}' \
+-w "\nHTTP Status: %{http_code}\n" \
+http://localhost:8080/api/v1/auth/register
+
 # Login
 curl -X POST \
 -H "Content-Type: application/json" \
 -d '{
   "email": "user1@gmail.com",
   "password": "password1"
+}' \
+-w "\nHTTP Status: %{http_code}\n" \
+ http://localhost:8080/api/v1/auth/login
+
+curl -X POST \
+-H "Content-Type: application/json" \
+-d '{
+  "email": "user2@gmail.com",
+  "password": "password2"
 }' \
 -w "\nHTTP Status: %{http_code}\n" \
  http://localhost:8080/api/v1/auth/login

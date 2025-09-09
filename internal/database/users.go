@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 )
 
@@ -53,6 +54,7 @@ func (m *UserModel) getUser(query string, args ...interface{}) (*User, error) {
 	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&user.Id, &user.Email, &user.Password, &user.Role)
 
 	if err != nil {
+		fmt.Println("error in internal db users:", err)
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
@@ -97,12 +99,12 @@ func (m *UserModel) GetAllUsers() ([]*User, error) {
 }
 
 func (m *UserModel) GetUserByEmail(email string) (*User, error) {
-	query := "select * from users where email = $1"
+	query := "select * from users where user_email = $1"
 	return m.getUser(query, email)
 }
 
 func (m *UserModel) GetUserById(id int) (*User, error) {
-	query := "select * from users where id = $1"
+	query := "select * from users where user_id = $1"
 	return m.getUser(query, id)
 }
 
