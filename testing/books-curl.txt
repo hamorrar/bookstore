@@ -2,6 +2,7 @@
 # Success
 curl -X POST \
 -H "Content-Type: application/json" \
+-H "Authorization: Bearer " \
 -d '{
   "Author": "Author1",
   "Title": "Title1",
@@ -10,8 +11,12 @@ curl -X POST \
 -w "\nHTTP Status: %{http_code}\n" \
 http://localhost:8080/api/v1/books 
 
+
+
+
 curl -X POST \
 -H "Content-Type: application/json" \
+-H "Authorization: Bearer " \
 -d '{
   "Author": "Author2",
   "Title": "Title2",
@@ -22,10 +27,55 @@ http://localhost:8080/api/v1/books
 
 curl -X POST \
 -H "Content-Type: application/json" \
+-H "Authorization: Bearer " \
 -d '{
   "Author": "Author3",
   "Title": "Title3",
   "Price": 13
+}' \
+-w "\nHTTP Status: %{http_code}\n" \
+http://localhost:8080/api/v1/books
+
+curl -X POST \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer " \
+-d '{
+  "Author": "Author4",
+  "Title": "Title4",
+  "Price": 14
+}' \
+-w "\nHTTP Status: %{http_code}\n" \
+http://localhost:8080/api/v1/books
+
+curl -X POST \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer " \
+-d '{
+  "Author": "Author5",
+  "Title": "Title5",
+  "Price": 15
+}' \
+-w "\nHTTP Status: %{http_code}\n" \
+http://localhost:8080/api/v1/books
+
+curl -X POST \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer " \
+-d '{
+  "Author": "Author6",
+  "Title": "Title6",
+  "Price": 16
+}' \
+-w "\nHTTP Status: %{http_code}\n" \
+http://localhost:8080/api/v1/books
+
+curl -X POST \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer " \
+-d '{
+  "Author": "Author7",
+  "Title": "Title7",
+  "Price": 17
 }' \
 -w "\nHTTP Status: %{http_code}\n" \
 http://localhost:8080/api/v1/books
@@ -49,7 +99,17 @@ http://localhost:8080/api/v1/books
 curl -X GET \
 -H "Content-Type: application/json" \
 -w "\nHTTP Status: %{http_code}\n" \
-http://localhost:8080/api/v1/books
+"http://localhost:8080/api/v1/books?page=1&limit=2"
+
+curl -X GET \
+-H "Content-Type: application/json" \
+-w "\nHTTP Status: %{http_code}\n" \
+"http://localhost:8080/api/v1/books?page=2&limit=2"
+
+curl -X GET \
+-H "Content-Type: application/json" \
+-w "\nHTTP Status: %{http_code}\n" \
+"http://localhost:8080/api/v1/books?page=4&limit=2"
 
 ------------
 
