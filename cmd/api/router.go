@@ -36,6 +36,7 @@ func (app *application) routes() http.Handler {
 		authGroup.DELETE("/books/:id", app.deleteBook)
 
 		authGroup.GET("/orders/all", app.getAllOrders)
+		authGroup.GET("/orders", app.getPageOfOrders)
 		authGroup.GET("/orders/:id", app.getOrder)
 		authGroup.POST("/orders", app.createOrder)
 		authGroup.PUT("/orders/:id", app.updateOrder)

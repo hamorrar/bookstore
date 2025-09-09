@@ -9,6 +9,12 @@ import (
 )
 
 func (app *application) createOrder(c *gin.Context) {
+	user := app.GetUserFromContext(c)
+	if user.Role != "Customer" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized to create an order"})
+		return
+	}
+
 	var order database.Order
 
 	if err := c.ShouldBindJSON(&order); err != nil {
@@ -26,6 +32,12 @@ func (app *application) createOrder(c *gin.Context) {
 }
 
 func (app *application) getPageOfOrders(c *gin.Context) {
+	user := app.GetUserFromContext(c)
+	if user.Role != "Admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized to get a page of orders"})
+		return
+	}
+
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "2"))
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 
@@ -76,14 +88,21 @@ func (app *application) getOrder(c *gin.Context) {
 		return
 	}
 
+	user := app.GetUserFromContext(c)
 	order, err := app.models.Orders.GetOrder(id)
-	if order == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get this user's order"})
 		return
 	}
 
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get order"})
+	if order == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Order not found to get"})
+		return
+	}
+
+	if order.User_Id != user.Id || user.Role != "Admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized to get this order"})
 		return
 	}
 
