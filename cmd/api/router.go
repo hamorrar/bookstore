@@ -25,22 +25,28 @@ func (app *application) routes() http.Handler {
 	authGroup.Use(app.AuthMiddleware())
 
 	{
-		authGroup.GET("/users/all", app.getAllUsers)
 		authGroup.GET("/users/:id", app.getUser)
 		authGroup.PUT("/users/:id", app.updateUser)
 		authGroup.DELETE("/users/:id", app.deleteUser)
 
-		authGroup.GET("/books/all", app.getAllBooks)
 		authGroup.POST("/books", app.createBook)
 		authGroup.PUT("/books/:id", app.updateBook)
 		authGroup.DELETE("/books/:id", app.deleteBook)
 
-		authGroup.GET("/orders/all", app.getAllOrders)
 		authGroup.GET("/orders", app.getPageOfOrders)
 		authGroup.GET("/orders/:id", app.getOrder)
 		authGroup.POST("/orders", app.createOrder)
 		authGroup.PUT("/orders/:id", app.updateOrder)
 		authGroup.DELETE("/orders/:id", app.deleteOrder)
+	}
+
+	v2 := g.Group("/api/v2")
+	authGroup = v2.Group("/")
+	authGroup.Use(app.AuthMiddleware())
+	{
+		authGroup.GET("/users/all", app.getAllUsers)
+		authGroup.GET("/books/all", app.getAllBooks)
+		authGroup.GET("/orders/all", app.getAllOrders)
 	}
 
 	return g
