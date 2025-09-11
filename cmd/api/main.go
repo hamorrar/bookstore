@@ -39,9 +39,9 @@ func main() {
 
 func setupApp() *application {
 	server_Port, _ := strconv.Atoi(os.Getenv("PORT"))
-	psqlInfo := os.Getenv("psqlInfo")
+	DB_DSN := os.Getenv("DB_DSN")
 
-	db, err := sql.Open("postgres", psqlInfo)
+	db, err := sql.Open("postgres", DB_DSN)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -27,9 +27,9 @@ func main() {
 
 	createDB()
 
-	psqlURL := os.Getenv("DB_URL")
+	DB_URL := os.Getenv("DB_URL")
 
-	db, err := sql.Open("postgres", psqlURL)
+	db, err := sql.Open("postgres", DB_URL)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -67,9 +67,9 @@ func main() {
 
 func createDB() {
 	// Open default "postgres" database to create bookstore database
-	DEFAULT_PSQL_INFO := os.Getenv("DEFAULT_PSQL_INFO")
+	DEFAULT_DB_DSN := os.Getenv("DEFAULT_DB_DSN")
 
-	db, err := sql.Open("postgres", DEFAULT_PSQL_INFO)
+	db, err := sql.Open("postgres", DEFAULT_DB_DSN)
 	if err != nil {
 		log.Fatal(err)
 	}
