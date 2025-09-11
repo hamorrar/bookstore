@@ -20,7 +20,13 @@ func main() {
 		log.Fatal("Please provide a migration direction: 'up' or 'down'.")
 	}
 
-	initDBEnv()
+	err := godotenv.Load(".env")
+	if err != nil {
+		panic(err)
+	}
+
+	createDB()
+
 	psqlURL := os.Getenv("DB_URL")
 
 	db, err := sql.Open("postgres", psqlURL)
@@ -59,25 +65,37 @@ func main() {
 	defer db.Close()
 }
 
-func initDBEnv() {
-	err := godotenv.Load(".env")
+func createDB() {
+	// Open default "postgres" database to create bookstore database
+	DEFAULT_PSQL_INFO := os.Getenv("DEFAULT_PSQL_INFO")
+
+	db, err := sql.Open("postgres", DEFAULT_PSQL_INFO)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = db.Ping()
 	if err != nil {
 		panic(err)
 	}
 
-	DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME := getDBEnv()
-
-	DB_URL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME)
-	os.Setenv("DB_URL", DB_URL)
-}
-
-func getDBEnv() (string, string, string, string, string) {
-	DB_HOST := os.Getenv("DB_HOST")
-	DB_PORT := os.Getenv("DB_PORT")
-	DB_USER := os.Getenv("DB_USER")
-	DB_PASSWORD := os.Getenv("DB_PASSWORD")
+	// Check if the prod/test database exists or needs to be created
 	DB_NAME := os.Getenv("DB_NAME")
 
-	return DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
+	var exists bool
+	query := fmt.Sprintf("select exists(select 1 from pg_database where datname = '%s')", DB_NAME)
+	err = db.QueryRow(query).Scan(&exists)
+	if err != nil {
+		log.Fatalf("Error checking database existence: %v", err)
+	}
 
+	// Create the database if not exists
+	if !exists {
+		query := fmt.Sprintf("create database %s", DB_NAME)
+		_, err = db.Exec(query)
+		if err != nil {
+			log.Fatalf("Error creating database '%s': %v", DB_NAME, err)
+		}
+		fmt.Printf("Database '%s' created or already exists.\n", DB_NAME)
+	}
 }
