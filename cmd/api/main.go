@@ -39,7 +39,7 @@ func main() {
 
 func setupApp() *application {
 	server_Port, _ := strconv.Atoi(os.Getenv("PORT"))
-	psqlInfo := os.Getenv("PSQL_INFO")
+	psqlInfo := os.Getenv("psqlInfo")
 
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
