@@ -19,10 +19,16 @@ sudo apt-get update
 sudo apt-get install -y migrate
 ```
 
-### Log into bookstore DB in a terminal
+### How to set up .env files
+- Put ``.env`` file in ``/`` and ``/cmd/api``. It should be the same.
+- Define DB_NAME, SECRET_KEY, DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, PORT, DB_URL, DEFAULT_DB_URL, DB_DSN, DEFAULT_DB_DSN.
+- Working on a better solution to keep one ``.env`` file.
+
+### Log into DB in a terminal
 ```bash
-psql -U postgres -h localhost -d bookstore
+psql -U postgres -h localhost
 ```
+Add ``-d <DATABASE_NAME>`` to connect to a specific database.
 
 ### Create migration files
 ```bash
@@ -50,6 +56,13 @@ go run ./cmd/api
 1. Apply up migrations as above
 1. start the go server
 1. send client requests with ``curl``. Examples found in [the testing directory](./testing)
+
+## Testing
+### Go Tests
+```bash
+go test ./...
+```
+Add ``-v`` flag for verbose mode.
 
 ## Misc
 
