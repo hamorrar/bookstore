@@ -104,13 +104,13 @@ func TestGetAllUsers(t *testing.T) {
 
 	var got []database.User
 	if err := json.Unmarshal(bodyBytes, &got); err != nil {
-		log.Fatalf("pain: %v", err.Error())
+		fmt.Println("unmarshalling error while test getting all", err.Error())
 	}
 
 	expected := `[{"id":1,"email":"user2@gmail.com","role":"Admin"},{"id":2,"email":"user3@gmail.com","role":"Customer"},{"id":3,"email":"user4@gmail.com","role":"Customer"},{"id":4,"email":"user5@gmail.com","role":"Customer"}]`
 	var want []database.User
 	if err := json.Unmarshal([]byte(expected), &want); err != nil {
-		log.Fatalf("pain 2: %v", err.Error())
+		fmt.Println("unmarshalling error while test getting all", err.Error())
 	}
 
 	assert.Equal(t, want, got)

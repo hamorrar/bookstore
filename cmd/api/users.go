@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -22,7 +21,6 @@ func (app *application) getAllUsers(c *gin.Context) {
 	var allUsers []*database.User
 
 	for {
-		fmt.Println("yeee")
 		users, err := app.models.Users.GetPageOfUsers(limit, page)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to get all users page by page."})
@@ -37,8 +35,6 @@ func (app *application) getAllUsers(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, allUsers)
-	// c.JSON(http.StatusOK, gin.H{"yep": "yea"})
-
 }
 
 func (app *application) getUser(c *gin.Context) {
