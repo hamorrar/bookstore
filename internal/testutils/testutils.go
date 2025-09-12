@@ -4,8 +4,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"log"
+	"net/http"
+	"net/http/httptest"
 	"os"
+	"strings"
 
+	"github.com/gin-gonic/gin"
 	"github.com/hamorrar/bookstore/internal/database"
 	"github.com/joho/godotenv"
 
@@ -61,4 +65,24 @@ func StringToJSON(str string) map[string]interface{} {
 		log.Fatalf("could not unmarshal expected: %v", err.Error())
 	}
 	return res
+}
+
+func RegisterCustomer(router *gin.Engine, url string) *httptest.ResponseRecorder {
+	payload := `{"email":"user1@gmail.com", "password":"password1", "role":"Customer"}`
+	req, _ := http.NewRequest("POST", url, strings.NewReader(payload))
+
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	return w
+}
+
+func RegisterAdmin(router *gin.Engine, url string) *httptest.ResponseRecorder {
+	payload := `{"email":"user2@gmail.com", "password":"password2", "role":"Admin"}`
+	req, _ := http.NewRequest("POST", url, strings.NewReader(payload))
+
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	return w
 }
