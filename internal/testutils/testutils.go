@@ -3,13 +3,12 @@ package testutils
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
-	"net/http/httptest"
 	"os"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/hamorrar/bookstore/internal/database"
 	"github.com/joho/godotenv"
 
@@ -62,27 +61,36 @@ func SetupDB() database.Models {
 func StringToJSON(str string) map[string]interface{} {
 	var res map[string]interface{}
 	if err := json.Unmarshal([]byte(str), &res); err != nil {
+		fmt.Println("---", str)
 		log.Fatalf("could not unmarshal expected: %v", err.Error())
 	}
 	return res
 }
 
-func RegisterCustomer(router *gin.Engine, url string) *httptest.ResponseRecorder {
+func RegisterCustomer(client *http.Client, url string) (*http.Response, error) {
 	payload := `{"email":"user1@gmail.com", "password":"password1", "role":"Customer"}`
-	req, _ := http.NewRequest("POST", url, strings.NewReader(payload))
+	resp, err := client.Post(url+"/auth/register", "application/json", strings.NewReader(payload))
 
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	return w
+	return resp, err
 }
 
-func RegisterAdmin(router *gin.Engine, url string) *httptest.ResponseRecorder {
+func RegisterAdmin(client *http.Client, url string) (*http.Response, error) {
 	payload := `{"email":"user2@gmail.com", "password":"password2", "role":"Admin"}`
-	req, _ := http.NewRequest("POST", url, strings.NewReader(payload))
+	resp, err := client.Post(url+"/auth/register", "application/json", strings.NewReader(payload))
 
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	return resp, err
+}
 
-	return w
+func LoginCustomer(client *http.Client, url string) (*http.Response, error) {
+	payload := `{"email":"user1@gmail.com", "password":"password1"}`
+	resp, err := client.Post(url+"/auth/login", "application/json", strings.NewReader(payload))
+
+	return resp, err
+}
+
+func LoginAdmin(client *http.Client, url string) (*http.Response, error) {
+	payload := `{"email":"user2@gmail.com", "password":"password2"}`
+	resp, err := client.Post(url+"/auth/login", "application/json", strings.NewReader(payload))
+
+	return resp, err
 }

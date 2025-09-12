@@ -1,7 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"io"
+	"log"
 	"net/http"
+	"net/http/cookiejar"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -16,19 +20,32 @@ func TestRegister_One_Customer(t *testing.T) {
 	router := gin.Default()
 	router.POST("/api/v1/auth/register", app.registerUser)
 
-	payload := `{"email":"user1@gmail.com", "password":"password1", "role":"Customer"}`
-	req, _ := http.NewRequest("POST", BASE_URL_v1+"/auth/register", strings.NewReader(payload))
+	ts := httptest.NewServer(router)
 
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	jar, _ := cookiejar.New(nil)
+	client := &http.Client{Jar: jar}
+
+	payload := `{"email":"user1@gmail.com", "password":"password1", "role":"Customer"}`
+
+	resp, err := client.Post(ts.URL+"/api/v1/auth/register", "application/json", strings.NewReader(payload))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer ts.Close()
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	defer resp.Body.Close()
 
 	expected := `{"id":1,"email":"user1@gmail.com","role":"Customer"}`
-
-	got := testutils.StringToJSON(w.Body.String())
+	got := testutils.StringToJSON(string(bodyBytes))
 	want := testutils.StringToJSON(expected)
 
 	assert.Equal(t, want, got)
-	assert.Equal(t, http.StatusCreated, w.Code)
+	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 }
 
 func TestRegister_One_Admin(t *testing.T) {
@@ -36,19 +53,32 @@ func TestRegister_One_Admin(t *testing.T) {
 	router := gin.Default()
 	router.POST("/api/v1/auth/register", app.registerUser)
 
-	payload := `{"email":"user2@gmail.com", "password":"password2", "role":"Admin"}`
-	req, _ := http.NewRequest("POST", BASE_URL_v1+"/auth/register", strings.NewReader(payload))
+	ts := httptest.NewServer(router)
 
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	jar, _ := cookiejar.New(nil)
+	client := &http.Client{Jar: jar}
+
+	payload := `{"email":"user2@gmail.com", "password":"password2", "role":"Admin"}`
+
+	resp, err := client.Post(ts.URL+"/api/v1/auth/register", "application/json", strings.NewReader(payload))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer ts.Close()
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	defer resp.Body.Close()
 
 	expected := `{"id":1,"email":"user2@gmail.com","role":"Admin"}`
-
-	got := testutils.StringToJSON(w.Body.String())
+	got := testutils.StringToJSON(string(bodyBytes))
 	want := testutils.StringToJSON(expected)
 
 	assert.Equal(t, want, got)
-	assert.Equal(t, http.StatusCreated, w.Code)
+	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 }
 
 func TestRegister_Two_Customers_Same(t *testing.T) {
@@ -56,87 +86,117 @@ func TestRegister_Two_Customers_Same(t *testing.T) {
 	router := gin.Default()
 	router.POST("/api/v1/auth/register", app.registerUser)
 
-	payload1 := `{"email":"user1@gmail.com", "password":"password1", "role":"Customer"}`
-	req1, _ := http.NewRequest("POST", BASE_URL_v1+"/auth/register", strings.NewReader(payload1))
+	ts := httptest.NewServer(router)
 
-	w1 := httptest.NewRecorder()
-	router.ServeHTTP(w1, req1)
+	jar, _ := cookiejar.New(nil)
+	client := &http.Client{Jar: jar}
 
-	expected1 := `{"id":1,"email":"user1@gmail.com","role":"Customer"}`
-
-	got1 := testutils.StringToJSON(w1.Body.String())
-	want1 := testutils.StringToJSON(expected1)
-
-	assert.Equal(t, want1, got1)
-	assert.Equal(t, http.StatusCreated, w1.Code)
-
-	// ----
-
-	payload2 := `{"email":"user1@gmail.com", "password":"password1", "role":"Customer"}`
-	req2, _ := http.NewRequest("POST", BASE_URL_v1+"/auth/register", strings.NewReader(payload2))
-
-	w2 := httptest.NewRecorder()
-	router.ServeHTTP(w2, req2)
-
-	expected2 := `{"error":"could not create registered user"}`
-
-	got2 := testutils.StringToJSON(w2.Body.String())
-	want2 := testutils.StringToJSON(expected2)
-
-	assert.Equal(t, want2, got2)
-	assert.Equal(t, http.StatusInternalServerError, w2.Code)
-
-}
-
-func TestLogin(t *testing.T) {
-	app := SetupTest()
-	router := gin.Default()
-	router.POST("/api/v1/auth/register", app.registerUser)
-	router.POST("/api/v1/auth/login", app.login)
-
-	// Register customer
 	payload := `{"email":"user1@gmail.com", "password":"password1", "role":"Customer"}`
-	req, _ := http.NewRequest("POST", BASE_URL_v1+"/auth/register", strings.NewReader(payload))
 
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	resp, err := client.Post(ts.URL+"/api/v1/auth/register", "application/json", strings.NewReader(payload))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer ts.Close()
 
-	// Register admin
-	payload = `{"email":"user2@gmail.com", "password":"password2", "role":"Admin"}`
-	req, _ = http.NewRequest("POST", BASE_URL_v1+"/auth/register", strings.NewReader(payload))
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 
-	w = httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	defer resp.Body.Close()
 
-	// Login customer
-	payload = `{"email":"user1@gmail.com", "password":"password1"}`
-	req, _ = http.NewRequest("POST", BASE_URL_v1+"/auth/login", strings.NewReader(payload))
-
-	w = httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	expected := `{"userId":1}`
-
-	got := testutils.StringToJSON(w.Body.String())
+	expected := `{"id":1,"email":"user1@gmail.com","role":"Customer"}`
+	got := testutils.StringToJSON(string(bodyBytes))
 	want := testutils.StringToJSON(expected)
 
 	assert.Equal(t, want, got)
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 
-	// Login admin
-	payload = `{"email":"user2@gmail.com", "password":"password2"}`
-	req, _ = http.NewRequest("POST", BASE_URL_v1+"/auth/login", strings.NewReader(payload))
+	// ----
 
-	w = httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	payload = `{"email":"user1@gmail.com", "password":"password1", "role":"Customer"}`
 
-	expected = `{"userId":2}`
+	resp, err = client.Post(ts.URL+"/api/v1/auth/register", "application/json", strings.NewReader(payload))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer ts.Close()
 
-	got = testutils.StringToJSON(w.Body.String())
+	bodyBytes, err = io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	defer resp.Body.Close()
+
+	expected = `{"error": "could not create registered user"}`
+	got = testutils.StringToJSON(string(bodyBytes))
 	want = testutils.StringToJSON(expected)
 
 	assert.Equal(t, want, got)
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+}
+
+func TestLogin(t *testing.T) {
+
+	app := SetupTest()
+	router := gin.Default()
+	ts := httptest.NewServer(router)
+
+	jar, _ := cookiejar.New(nil)
+	client := &http.Client{Jar: jar}
+
+	router.POST("/api/v1/auth/register", app.registerUser)
+	router.POST("/api/v1/auth/login", app.login)
+
+	testutils.RegisterCustomer(client, ts.URL+"/api/v1")
+	testutils.RegisterAdmin(client, ts.URL+"/api/v1")
+
+	// Login customer
+	payload := `{"email":"user1@gmail.com", "password":"password1"}`
+
+	resp, err := client.Post(ts.URL+"/api/v1/auth/login", "application/json", strings.NewReader(payload))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer ts.Close()
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	defer resp.Body.Close()
+
+	expected := `{"userId":1}`
+	got := testutils.StringToJSON(string(bodyBytes))
+	want := testutils.StringToJSON(expected)
+
+	assert.Equal(t, want, got)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	// Login admin
+	payload = `{"email":"user2@gmail.com", "password":"password2"}`
+
+	resp, err = client.Post(ts.URL+"/api/v1/auth/login", "application/json", strings.NewReader(payload))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer ts.Close()
+
+	bodyBytes, err = io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	defer resp.Body.Close()
+
+	expected = `{"userId":2}`
+	got = testutils.StringToJSON(string(bodyBytes))
+	want = testutils.StringToJSON(expected)
+
+	assert.Equal(t, want, got)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
 }
 
 func TestLogin_Wrong_Password(t *testing.T) {
@@ -145,36 +205,55 @@ func TestLogin_Wrong_Password(t *testing.T) {
 	router.POST("/api/v1/auth/register", app.registerUser)
 	router.POST("/api/v1/auth/login", app.login)
 
-	_ = testutils.RegisterCustomer(router, BASE_URL_v1+"/auth/register")
-	_ = testutils.RegisterAdmin(router, BASE_URL_v1+"/auth/register")
+	ts := httptest.NewServer(router)
+
+	jar, _ := cookiejar.New(nil)
+	client := &http.Client{Jar: jar}
+
+	testutils.RegisterCustomer(client, ts.URL+"/api/v1")
+	testutils.RegisterAdmin(client, ts.URL+"/api/v1")
 
 	// Login customer
 	payload := `{"email":"user1@gmail.com", "password":"password111"}`
-	req, _ := http.NewRequest("POST", BASE_URL_v1+"/auth/login", strings.NewReader(payload))
 
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	resp, err := client.Post(ts.URL+"/api/v1/auth/login", "application/json", strings.NewReader(payload))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer ts.Close()
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	defer resp.Body.Close()
 
 	expected := `{"error": "Invalid email or password"}`
-
-	got := testutils.StringToJSON(w.Body.String())
+	got := testutils.StringToJSON(string(bodyBytes))
 	want := testutils.StringToJSON(expected)
 
 	assert.Equal(t, want, got)
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 
 	// Login admin
 	payload = `{"email":"user2@gmail.com", "password":"password222"}`
-	req, _ = http.NewRequest("POST", BASE_URL_v1+"/auth/login", strings.NewReader(payload))
+	resp, err = client.Post(ts.URL+"/api/v1/auth/login", "application/json", strings.NewReader(payload))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer ts.Close()
 
-	w = httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	bodyBytes, err = io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	defer resp.Body.Close()
 
 	expected = `{"error": "Invalid email or password"}`
-
-	got = testutils.StringToJSON(w.Body.String())
+	got = testutils.StringToJSON(string(bodyBytes))
 	want = testutils.StringToJSON(expected)
 
 	assert.Equal(t, want, got)
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 }
