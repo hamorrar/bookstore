@@ -8,7 +8,7 @@ import (
 	"github.com/hamorrar/bookstore/internal/testutils"
 )
 
-var BASE_URL string = fmt.Sprintf("http://%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))
+var BASE_URL_v1 string = fmt.Sprintf("http://%s:%s/api/v1", os.Getenv("HOST"), os.Getenv("PORT"))
 
 func SetupTest() *application {
 	models := testutils.SetupDB()
