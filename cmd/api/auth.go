@@ -15,11 +15,6 @@ type loginRequest struct {
 	Password string `json:"password" binding:"required,min=4"`
 }
 
-type loginResponse struct {
-	Token  string `json:"token"`
-	UserId int    `json:"userId"`
-}
-
 type registerRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=8"`
@@ -49,7 +44,7 @@ func (app *application) registerUser(c *gin.Context) {
 
 	err = app.models.Users.CreateUser(&user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not created registered user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not create registered user"})
 		return
 	}
 	c.JSON(http.StatusCreated, user)
@@ -81,7 +76,7 @@ func (app *application) login(c *gin.Context) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userId": existingUser.Id,
-		"expr":   time.Now().Add(time.Minute * 5).Unix(),
+		"exp":    time.Now().Add(time.Hour).Unix(),
 	})
 
 	tokenString, err := token.SignedString([]byte(app.jwtSecret))
@@ -90,5 +85,7 @@ func (app *application) login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, loginResponse{Token: tokenString, UserId: existingUser.Id})
+	c.SetCookie("auth_token", tokenString, int(time.Second*60), "/", "", false, true)
+
+	c.JSON(http.StatusOK, gin.H{"userId": existingUser.Id})
 }
