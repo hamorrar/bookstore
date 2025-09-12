@@ -2,17 +2,14 @@
 # Success
 curl -X POST \
 -H "Content-Type: application/json" \
--H "Authorization: Bearer " \
 -d '{
   "Author": "Author1",
   "Title": "Title1",
   "Price": 11
 }' \
+-b cookies.txt \
 -w "\nHTTP Status: %{http_code}\n" \
 http://localhost:8080/api/v1/books 
-
-
-
 
 curl -X POST \
 -H "Content-Type: application/json" \
