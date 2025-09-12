@@ -43,7 +43,7 @@ func (app *application) getAllUsers(c *gin.Context) {
 
 func (app *application) getUser(c *gin.Context) {
 	userCtx := app.GetUserFromContext(c)
-	if userCtx.Role != "Customer" {
+	if userCtx.Role != "Admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized to get all users"})
 		return
 	}
