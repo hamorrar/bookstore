@@ -10,15 +10,18 @@ import (
 
 func (app *application) AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString := c.GetHeader("Authorization")
-		if tokenString == "" {
+		authHeader := c.GetHeader("Authorization")
+		var tokenString string
+
+		if strings.HasPrefix(authHeader, "Bearer ") {
+			tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+		} else {
 			cookie, err := c.Cookie("auth_token")
 			if err == nil {
-				tokenString = "Bearer " + cookie
+				tokenString = cookie
 			}
 		}
 
-		tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 		if tokenString == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing token"})
 			c.Abort()

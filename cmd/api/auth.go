@@ -85,7 +85,7 @@ func (app *application) login(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie("auth_token", tokenString, int(time.Second*60), "/", "", false, true)
+	c.SetCookie("auth_token", tokenString, 3600, "/", "", false, true)
 
 	c.JSON(http.StatusOK, gin.H{"userId": existingUser.Id})
 }
