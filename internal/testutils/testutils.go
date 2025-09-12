@@ -92,3 +92,12 @@ func LoginAdmin(client *http.Client, url string) (*http.Response, error) {
 
 	return resp, err
 }
+
+func MakeABook(client *http.Client, url string) (*http.Response, error) {
+	payload := `{"title":"Title1", "author":"First","price":1}`
+	resp, err := client.Post(url+"/books", "application/json", strings.NewReader(payload))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	return resp, err
+}
