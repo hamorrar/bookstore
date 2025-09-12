@@ -3,7 +3,6 @@ package testutils
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -61,7 +60,6 @@ func SetupDB() database.Models {
 func StringToJSON(str string) map[string]interface{} {
 	var res map[string]interface{}
 	if err := json.Unmarshal([]byte(str), &res); err != nil {
-		fmt.Println("---", str)
 		log.Fatalf("could not unmarshal expected: %v", err.Error())
 	}
 	return res
