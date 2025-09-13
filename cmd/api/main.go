@@ -19,12 +19,12 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-// @title Bookstore API
-// @version 2.0
-// @description REST API for a bookstore with books, orders, and users
-// @securityDefinitions.apikey CookieAuth
-// @in cookie
-// @name auth_token
+//	@title						Bookstore API
+//	@version					2.0
+//	@description				REST API for a bookstore with books, orders, and users
+//	@securityDefinitions.apikey	CookieAuth
+//	@in							cookie
+//	@name						auth_token
 
 type application struct {
 	port      int

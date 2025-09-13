@@ -9,18 +9,19 @@ import (
 )
 
 // createOrder creates an order
-// @Summary		creates an order
-// @Description	creates an order
-// @Tags		order
-// @Accept		json
-// @Produce		json
-// @Param		order body database.Order true "new order to add to db"
-// @Success		201	{object} database.Order "successfully created an order"
-// @Failure 403 {object} gin.H "wrong role"
-// @Failure 400 {object} gin.H "error binding JSON"
-// @Failure 500 {object} gin.H "error creating order"
-// @Router			/api/v1/orders [post]
-// @Security CookieAuth
+//
+//	@Summary		creates an order
+//	@Description	creates an order
+//	@Tags			order
+//	@Accept			json
+//	@Produce		json
+//	@Param			order	body		database.Order	true	"new order to add to db"
+//	@Success		201		{object}	database.Order	"successfully created an order"
+//	@Failure		403		{object}	gin.H			"wrong role"
+//	@Failure		400		{object}	gin.H			"error binding JSON"
+//	@Failure		500		{object}	gin.H			"error creating order"
+//	@Router			/api/v1/orders [post]
+//	@Security		CookieAuth
 func (app *application) createOrder(c *gin.Context) {
 	user := app.GetUserFromContext(c)
 	if user.Role != "Customer" {
@@ -45,18 +46,19 @@ func (app *application) createOrder(c *gin.Context) {
 }
 
 // getPageOfOrders gets a page of orders
-// @Summary		gets a page of orders
-// @Description	gets a page of orders
-// @Tags		order
-// @Accept		json
-// @Produce		json
-// @Param		page query int false "page number to request"
-// @Param limit query int false "max number of orders to return per page"
-// @Success		200	{array} database.Order "successfully got a page of orders"
-// @Failure 500 {object} gin.H "error getting a page"
-// @Failure 403 {object} gin.H "wrong role"
-// @Router			/api/v1/orders [get]
-// @Security CookieAuth
+//
+//	@Summary		gets a page of orders
+//	@Description	gets a page of orders
+//	@Tags			order
+//	@Accept			json
+//	@Produce		json
+//	@Param			page	query		int				false	"page number to request"
+//	@Param			limit	query		int				false	"max number of orders to return per page"
+//	@Success		200		{array}		database.Order	"successfully got a page of orders"
+//	@Failure		500		{object}	gin.H			"error getting a page"
+//	@Failure		403		{object}	gin.H			"wrong role"
+//	@Router			/api/v1/orders [get]
+//	@Security		CookieAuth
 func (app *application) getPageOfOrders(c *gin.Context) {
 	user := app.GetUserFromContext(c)
 	if user.Role != "Admin" {
@@ -77,16 +79,17 @@ func (app *application) getPageOfOrders(c *gin.Context) {
 }
 
 // getAllOrders gets all orders
-// @Summary		gets all orders
-// @Description	gets all orders
-// @Tags		order
-// @Accept		json
-// @Produce		json
-// @Success		200	{array} database.Order "successfully got all Orders"
-// @Failure 500 {object} gin.H "error getting all Orders"
-// @Failure 403 {object} gin.H "wrong role"
-// @Router			/api/v2/orders/all [get]
-// @Security CookieAuth
+//
+//	@Summary		gets all orders
+//	@Description	gets all orders
+//	@Tags			order
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{array}		database.Order	"successfully got all Orders"
+//	@Failure		500	{object}	gin.H			"error getting all Orders"
+//	@Failure		403	{object}	gin.H			"wrong role"
+//	@Router			/api/v2/orders/all [get]
+//	@Security		CookieAuth
 func (app *application) getAllOrders(c *gin.Context) {
 	user := app.GetUserFromContext(c)
 	if user.Role != "Admin" {
@@ -116,19 +119,20 @@ func (app *application) getAllOrders(c *gin.Context) {
 }
 
 // getOrder get one order
-// @Summary		get one order
-// @Description	get one order by id
-// @Tags		order
-// @Accept		json
-// @Produce		json
-// @Param		id query int true "id of order to get"
-// @Success		200	{object} database.Order "successfully got an order"
-// @Failure 400 {object} gin.H "invalid order id"
-// @Failure 404 {object} gin.H "order not found with this id"
-// @Failure 500 {object} gin.H "error getting order"
-// @Failure 403 {object} gin.H "wrong role/unauthorized"
-// @Router			/api/v1/orders/:id [get]
-// @Security CookieAuth
+//
+//	@Summary		get one order
+//	@Description	get one order by id
+//	@Tags			order
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	query		int				true	"id of order to get"
+//	@Success		200	{object}	database.Order	"successfully got an order"
+//	@Failure		400	{object}	gin.H			"invalid order id"
+//	@Failure		404	{object}	gin.H			"order not found with this id"
+//	@Failure		500	{object}	gin.H			"error getting order"
+//	@Failure		403	{object}	gin.H			"wrong role/unauthorized"
+//	@Router			/api/v1/orders/:id [get]
+//	@Security		CookieAuth
 func (app *application) getOrder(c *gin.Context) {
 	user := app.GetUserFromContext(c)
 	if user.Role != "Customer" {
@@ -163,18 +167,19 @@ func (app *application) getOrder(c *gin.Context) {
 }
 
 // deleteOrder delete an order
-// @Summary		delete order
-// @Description	delete an order by id
-// @Tags		order
-// @Accept		json
-// @Produce		json
-// @Param		id query int true "id of order to delete"
-// @Success		204	"successfully deleted"
-// @Failure 403 {object} gin.H "wrong role"
-// @Failure 400 {object} gin.H "invalid id"
-// @Failure 500 {object} gin.H "error deleting order"
-// @Router			/api/v1/orders/:id [delete]
-// @Security CookieAuth
+//
+//	@Summary		delete order
+//	@Description	delete an order by id
+//	@Tags			order
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	query	int	true	"id of order to delete"
+//	@Success		204	"successfully deleted"
+//	@Failure		403	{object}	gin.H	"wrong role"
+//	@Failure		400	{object}	gin.H	"invalid id"
+//	@Failure		500	{object}	gin.H	"error deleting order"
+//	@Router			/api/v1/orders/:id [delete]
+//	@Security		CookieAuth
 func (app *application) deleteOrder(c *gin.Context) {
 	user := app.GetUserFromContext(c)
 	if user.Role != "Admin" {
@@ -213,22 +218,23 @@ func (app *application) deleteOrder(c *gin.Context) {
 }
 
 // updateOrder updates an order
-// @Summary		update an order
-// @Description	update an order by id
-// @Tags		order
-// @Accept		json
-// @Produce		json
-// @Param		id query int true "id of order to update"
-// @Param order body database.Order true "updated order data"
-// @Success 200	{object} database.Order "successfully updated a order"
-// @Failure 403 {object} gin.H "wrong role/unauthorized"
-// @Failure 400 {object} gin.H "invalid id"
-// @Failure 500 {object} gin.H "error getting order"
-// @Failure 404 {object} gin.H "order to update not found"
-// @Failure 400 {object} gin.H "error binding JSON"
-// @Failure 500 {object} gin.H "failed to update order"
-// @Router			/api/v1/orders/:id [put]
-// @Security CookieAuth
+//
+//	@Summary		update an order
+//	@Description	update an order by id
+//	@Tags			order
+//	@Accept			json
+//	@Produce		json
+//	@Param			id		query		int				true	"id of order to update"
+//	@Param			order	body		database.Order	true	"updated order data"
+//	@Success		200		{object}	database.Order	"successfully updated a order"
+//	@Failure		403		{object}	gin.H			"wrong role/unauthorized"
+//	@Failure		400		{object}	gin.H			"invalid id"
+//	@Failure		500		{object}	gin.H			"error getting order"
+//	@Failure		404		{object}	gin.H			"order to update not found"
+//	@Failure		400		{object}	gin.H			"error binding JSON"
+//	@Failure		500		{object}	gin.H			"failed to update order"
+//	@Router			/api/v1/orders/:id [put]
+//	@Security		CookieAuth
 func (app *application) updateOrder(c *gin.Context) {
 	user := app.GetUserFromContext(c)
 	if user.Role != "Customer" {
