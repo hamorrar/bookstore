@@ -20,9 +20,14 @@ sudo apt-get install -y migrate
 ```
 
 ### How to set up .env files
-- Put ``.env`` file in ``/`` and ``/cmd/api``. It should be the same.
+- Put ``.env`` file in ``/``.
 - Define DB_NAME, SECRET_KEY, DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, PORT, DB_URL, DEFAULT_DB_URL, DB_DSN, DEFAULT_DB_DSN.
-- Working on a better solution to keep one ``.env`` file.
+
+### Documentation
+```bash
+swag init --dir cmd/api --parseDependency --parseInternal --parseDepth 1
+```
+Might need to ``export PATH="$(go env GOPATH)/bin:$PATH"`` first.
 
 ### Log into DB in a terminal
 ```bash
@@ -55,14 +60,17 @@ go run ./cmd/api
 ## To Run from the root directory
 1. Apply up migrations as above
 1. start the go server
-1. send client requests with ``curl``. Examples found in [the testing directory](./testing)
+1. send client requests with ``curl``
 
 ## Testing
 ### Go Tests
 ```bash
 go test ./...
 ```
-Add ``-v`` flag for verbose mode.
+Flags:
+- ``-v`` flag for verbose mode
+- ``-failfast`` to stop on the first failure
+- ``-cover`` to show test coverage percentage.
 
 ## Misc
 
@@ -89,4 +97,3 @@ select * from schema_migrations;
 
 ## Ideas
 - create a simulation of a big processing jobs by using a timer to wait for a random 1-5 second wait per "task" for 10 tasks to practice making a "/api/check/:jobid" endpoint to get the status of my job.
-- for pagination practice, copy paste 10 curl requests to add books to paginate thru a large get request, 2 books per page
