@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/hamorrar/bookstore/internal/database"
-	"github.com/joho/godotenv"
 
 	"github.com/golang-migrate/migrate"
 	"github.com/golang-migrate/migrate/database/postgres"
@@ -19,11 +18,6 @@ import (
 )
 
 func SetupDB() database.Models {
-	err := godotenv.Load(".env")
-	if err != nil {
-		panic(err)
-	}
-
 	DB_DSN := os.Getenv("DB_DSN")
 
 	db, err := sql.Open("postgres", DB_DSN)
