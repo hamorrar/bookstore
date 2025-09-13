@@ -11,11 +11,20 @@ import (
 
 	"github.com/joho/godotenv"
 
+	_ "github.com/hamorrar/bookstore/docs"
+
 	"github.com/hamorrar/bookstore/internal/database"
 
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
+
+// @title Bookstore API
+// @version 2.0
+// @description REST API for a bookstore with books, orders, and users
+// @securityDefinitions.apikey CookieAuth
+// @in cookie
+// @name auth_token
 
 type application struct {
 	port      int

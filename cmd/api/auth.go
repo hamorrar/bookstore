@@ -21,6 +21,18 @@ type registerRequest struct {
 	Role     string `json:"role" binding:"required"`
 }
 
+// RegisterUser registers a new user
+// @Summary		registers a new user
+// @Description	registers a new user
+// @Tags		auth
+// @Accept		json
+// @Produce		json
+// @Param		user body registerRequest true "user registration info"
+// @Success		201	{object} database.User
+// @Failure 400 {object} gin.H "error binding JSON"
+// @Failure 500 {object} gin.H "error generating password"
+// @Failure 500 {object} gin.H "error creating user"
+// @Router		/api/v1/auth/register [post]
 func (app *application) registerUser(c *gin.Context) {
 	var register registerRequest
 
@@ -50,6 +62,20 @@ func (app *application) registerUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, user)
 }
 
+// Login logins in a user
+// @Summary		logins a user
+// @Description	logins a user
+// @Tags		auth
+// @Accept		json
+// @Produce		json
+// @Param		user body loginRequest true "user login info"
+// @Success		200	{object} gin.H "Successfully logged in user"
+// @Failure 400 {object} gin.H "error binding JSON"
+// @Failure 401 {object} gin.H "error finding user with email"
+// @Failure 500 {object} gin.H "error getting user by email"
+// @Failure 401 {object} gin.H "invalid email or password"
+// @Failure 500 {object} gin.H "error generating token"
+// @Router			/api/v1/auth/login [post]
 func (app *application) login(c *gin.Context) {
 	var auth loginRequest
 	if err := c.ShouldBindJSON(&auth); err != nil {

@@ -1,0 +1,701 @@
+definitions:
+  database.Book:
+    properties:
+      author:
+        minLength: 3
+        type: string
+      id:
+        type: integer
+      price:
+        type: integer
+      title:
+        minLength: 3
+        type: string
+    required:
+    - author
+    - price
+    - title
+    type: object
+  database.Order:
+    properties:
+      id:
+        type: integer
+      status:
+        type: string
+      total_price:
+        type: integer
+      user_id:
+        type: integer
+    required:
+    - status
+    - total_price
+    - user_id
+    type: object
+  database.User:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      role:
+        type: string
+    required:
+    - email
+    - role
+    type: object
+  gin.H:
+    additionalProperties: {}
+    type: object
+  main.loginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 4
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  main.registerRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      role:
+        type: string
+    required:
+    - email
+    - password
+    - role
+    type: object
+info:
+  contact: {}
+  description: REST API for a bookstore with books, orders, and users
+  title: Bookstore API
+  version: "2.0"
+paths:
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: logins a user
+      parameters:
+      - description: user login info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/main.loginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully logged in user
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: error binding JSON
+          schema:
+            $ref: '#/definitions/gin.H'
+        "401":
+          description: invalid email or password
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: error generating token
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: logins a user
+      tags:
+      - auth
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: registers a new user
+      parameters:
+      - description: user registration info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/main.registerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/database.User'
+        "400":
+          description: error binding JSON
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: error creating user
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: registers a new user
+      tags:
+      - auth
+  /api/v1/books:
+    get:
+      consumes:
+      - application/json
+      description: gets a page of books
+      parameters:
+      - description: page number to request
+        in: query
+        name: page
+        type: integer
+      - description: max number of books to return per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: successfully got a page of books
+          schema:
+            items:
+              $ref: '#/definitions/database.Book'
+            type: array
+        "500":
+          description: error getting a page
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: gets a page of books
+      tags:
+      - book
+    post:
+      consumes:
+      - application/json
+      description: creates a book
+      parameters:
+      - description: new book to add to db
+        in: body
+        name: book
+        required: true
+        schema:
+          $ref: '#/definitions/database.Book'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: successfully created a book
+          schema:
+            $ref: '#/definitions/database.Book'
+        "400":
+          description: error binding JSON
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: wrong role
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: error creating books
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - CookieAuth: []
+      summary: creates a book
+      tags:
+      - book
+  /api/v1/books/:id:
+    delete:
+      consumes:
+      - application/json
+      description: delete a book by id
+      parameters:
+      - description: id of book to delete
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: successfully deleted
+        "400":
+          description: invalid id
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: wrong role
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: error deleting book
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - CookieAuth: []
+      summary: delete book
+      tags:
+      - book
+    get:
+      consumes:
+      - application/json
+      description: get one book by id
+      parameters:
+      - description: id of book to get
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: successfully got a book
+          schema:
+            $ref: '#/definitions/database.Book'
+        "400":
+          description: invalid book id
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: book not found with this id
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: error getting book
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: get one book
+      tags:
+      - book
+    put:
+      consumes:
+      - application/json
+      description: update a book by id
+      parameters:
+      - description: id of book to update
+        in: query
+        name: id
+        required: true
+        type: integer
+      - description: updated book data
+        in: body
+        name: book
+        required: true
+        schema:
+          $ref: '#/definitions/database.Book'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: successfully updated a book
+          schema:
+            $ref: '#/definitions/database.Book'
+        "400":
+          description: error binding JSON
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: wrong role
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: book to update not found
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: failed to update book
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - CookieAuth: []
+      summary: update a book
+      tags:
+      - book
+  /api/v1/orders:
+    get:
+      consumes:
+      - application/json
+      description: gets a page of orders
+      parameters:
+      - description: page number to request
+        in: query
+        name: page
+        type: integer
+      - description: max number of orders to return per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: successfully got a page of orders
+          schema:
+            items:
+              $ref: '#/definitions/database.Order'
+            type: array
+        "403":
+          description: wrong role
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: error getting a page
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - CookieAuth: []
+      summary: gets a page of orders
+      tags:
+      - order
+    post:
+      consumes:
+      - application/json
+      description: creates an order
+      parameters:
+      - description: new order to add to db
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/database.Order'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: successfully created an order
+          schema:
+            $ref: '#/definitions/database.Order'
+        "400":
+          description: error binding JSON
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: wrong role
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: error creating order
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - CookieAuth: []
+      summary: creates an order
+      tags:
+      - order
+  /api/v1/orders/:id:
+    delete:
+      consumes:
+      - application/json
+      description: delete an order by id
+      parameters:
+      - description: id of order to delete
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: successfully deleted
+        "400":
+          description: invalid id
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: wrong role
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: error deleting order
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - CookieAuth: []
+      summary: delete order
+      tags:
+      - order
+    get:
+      consumes:
+      - application/json
+      description: get one order by id
+      parameters:
+      - description: id of order to get
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: successfully got an order
+          schema:
+            $ref: '#/definitions/database.Order'
+        "400":
+          description: invalid order id
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: wrong role/unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: order not found with this id
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: error getting order
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - CookieAuth: []
+      summary: get one order
+      tags:
+      - order
+    put:
+      consumes:
+      - application/json
+      description: update an order by id
+      parameters:
+      - description: id of order to update
+        in: query
+        name: id
+        required: true
+        type: integer
+      - description: updated order data
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/database.Order'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: successfully updated a order
+          schema:
+            $ref: '#/definitions/database.Order'
+        "400":
+          description: error binding JSON
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: wrong role/unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: order to update not found
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: failed to update order
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - CookieAuth: []
+      summary: update an order
+      tags:
+      - order
+  /api/v1/users/:id:
+    delete:
+      consumes:
+      - application/json
+      description: delete a user by id
+      parameters:
+      - description: id of user to delete
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: successfully deleted
+        "400":
+          description: invalid id
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: wrong role
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: error deleting user
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - CookieAuth: []
+      summary: delete user
+      tags:
+      - user
+    get:
+      consumes:
+      - application/json
+      description: get one user by id
+      parameters:
+      - description: id of user to get
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: successfully got a user
+          schema:
+            $ref: '#/definitions/database.User'
+        "400":
+          description: invalid user id
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: wrong role/unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: user not found with this id
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: error getting user
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - CookieAuth: []
+      summary: get one user
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      description: update a user by id
+      parameters:
+      - description: id of user to update
+        in: query
+        name: id
+        required: true
+        type: integer
+      - description: updated user data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/database.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: successfully updated a user
+          schema:
+            $ref: '#/definitions/database.User'
+        "400":
+          description: error binding JSON
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: wrong role/unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: user to update not found
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: failed to update user
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - CookieAuth: []
+      summary: update a user
+      tags:
+      - user
+  /api/v2/books/all:
+    get:
+      consumes:
+      - application/json
+      description: gets all books
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: successfully got all books
+          schema:
+            items:
+              $ref: '#/definitions/database.Book'
+            type: array
+        "500":
+          description: error getting all books
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - CookieAuth: []
+      summary: gets all books
+      tags:
+      - book
+  /api/v2/orders/all:
+    get:
+      consumes:
+      - application/json
+      description: gets all orders
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: successfully got all Orders
+          schema:
+            items:
+              $ref: '#/definitions/database.Order'
+            type: array
+        "403":
+          description: wrong role
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: error getting all Orders
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - CookieAuth: []
+      summary: gets all orders
+      tags:
+      - order
+  /api/v2/users/all:
+    get:
+      consumes:
+      - application/json
+      description: gets all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: successfully got all users
+          schema:
+            items:
+              $ref: '#/definitions/database.User'
+            type: array
+        "403":
+          description: wrong role
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: error getting all users
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - CookieAuth: []
+      summary: gets all users
+      tags:
+      - user
+securityDefinitions:
+  CookieAuth:
+    in: cookie
+    name: auth_token
+    type: apiKey
+swagger: "2.0"

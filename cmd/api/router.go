@@ -1,7 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+	"os"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/gin-gonic/gin"
 )
@@ -48,6 +53,14 @@ func (app *application) routes() http.Handler {
 		authGroup.GET("/books/all", app.getAllBooks)
 		authGroup.GET("/orders/all", app.getAllOrders)
 	}
+
+	g.GET("/swagger/*any", func(c *gin.Context) {
+		if c.Request.RequestURI == "/swagger/" {
+			c.Redirect(http.StatusFound, "/swagger/index.html")
+		}
+		url := fmt.Sprintf("http:%s:%s/swagger/doc.json", os.Getenv("DB_HOST"), os.Getenv("PORT"))
+		ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL(url))(c)
+	})
 
 	return g
 }
