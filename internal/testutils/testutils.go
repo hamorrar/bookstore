@@ -101,3 +101,12 @@ func MakeABook(client *http.Client, url string) (*http.Response, error) {
 	}
 	return resp, err
 }
+
+func MakeAnOrder(client *http.Client, url string) (*http.Response, error) {
+	payload := `{"user_id":1, "status":"Pending","total_price":1}`
+	resp, err := client.Post(url+"/orders", "application/json", strings.NewReader(payload))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	return resp, err
+}

@@ -81,6 +81,11 @@ func (app *application) getAllOrders(c *gin.Context) {
 }
 
 func (app *application) getOrder(c *gin.Context) {
+	user := app.GetUserFromContext(c)
+	if user.Role != "Customer" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized to get an order"})
+		return
+	}
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -88,7 +93,7 @@ func (app *application) getOrder(c *gin.Context) {
 		return
 	}
 
-	user := app.GetUserFromContext(c)
+	// user = app.GetUserFromContext(c)
 	order, err := app.models.Orders.GetOrder(id)
 
 	if err != nil {
@@ -101,7 +106,7 @@ func (app *application) getOrder(c *gin.Context) {
 		return
 	}
 
-	if order.User_Id != user.Id || user.Role != "Admin" {
+	if order.User_Id != user.Id {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized to get this order"})
 		return
 	}
@@ -111,6 +116,11 @@ func (app *application) getOrder(c *gin.Context) {
 }
 
 func (app *application) deleteOrder(c *gin.Context) {
+	user := app.GetUserFromContext(c)
+	if user.Role != "Admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized to create an order"})
+		return
+	}
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -118,7 +128,7 @@ func (app *application) deleteOrder(c *gin.Context) {
 		return
 	}
 
-	user := app.GetUserFromContext(c)
+	// user := app.GetUserFromContext(c)
 	existingOrder, err := app.models.Orders.GetOrder(id)
 
 	if err != nil {
@@ -131,7 +141,7 @@ func (app *application) deleteOrder(c *gin.Context) {
 		return
 	}
 
-	if existingOrder.User_Id != user.Id || user.Role != "Admin" {
+	if user.Role != "Admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized to delete this order"})
 		return
 	}
@@ -145,13 +155,18 @@ func (app *application) deleteOrder(c *gin.Context) {
 }
 
 func (app *application) updateOrder(c *gin.Context) {
+	user := app.GetUserFromContext(c)
+	if user.Role != "Customer" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized to update an order"})
+		return
+	}
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid order ID"})
 		return
 	}
 
-	user := app.GetUserFromContext(c)
+	// user := app.GetUserFromContext(c)
 	existingOrder, err := app.models.Orders.GetOrder(id)
 
 	if err != nil {
@@ -164,7 +179,7 @@ func (app *application) updateOrder(c *gin.Context) {
 		return
 	}
 
-	if existingOrder.User_Id != user.Id || user.Role != "Admin" {
+	if existingOrder.User_Id != user.Id {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized to update this order"})
 		return
 	}
