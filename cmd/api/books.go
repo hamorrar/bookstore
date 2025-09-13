@@ -11,8 +11,8 @@ import (
 
 func (app *application) createBook(c *gin.Context) {
 	user := app.GetUserFromContext(c)
-	if user.Role != "Customer" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Unathorized to get all books"})
+	if user.Role != "Admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Unathorized to create book"})
 		return
 	}
 
@@ -123,7 +123,7 @@ func (app *application) deleteBook(c *gin.Context) {
 func (app *application) updateBook(c *gin.Context) {
 	user := app.GetUserFromContext(c)
 	if user.Role != "Admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized to update a book"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized to update book"})
 		return
 	}
 
