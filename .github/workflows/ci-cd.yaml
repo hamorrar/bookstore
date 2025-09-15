@@ -26,7 +26,13 @@ jobs:
           --health-retries=5
 
     env:
-      DB_URL: postgres://postgres:postgres@localhost:5432/bookstore?sslmode=disable
+      DB_URL: "postgres://postgres:${{ secrets.DB_PASSWORD }}@localhost:5432/bookstore?sslmode=disable"
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      PORT: 8080
+      DB_DSN: "host=localhost port=5432 dbname=bookstore user=postgres password=${{ secrets.DB_PASSWORD }} sslmode=disable"
 
     steps:
       - name: Checkout Code
