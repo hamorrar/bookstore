@@ -46,7 +46,7 @@ jobs:
       - name: Lint
         uses: golangci/golangci-lint-action@v4
         with:
-          version: 2.4.0
+          version: v2.4.0
 
       - name: Run Migrations
         run: go run ./cmd/migrate/main.go up
