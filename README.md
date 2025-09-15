@@ -23,7 +23,7 @@ sudo apt-get install -y migrate
 - Put ``.env`` file in ``/``.
 - Define DB_NAME, SECRET_KEY, DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, PORT, DB_URL, DEFAULT_DB_URL, DB_DSN, DEFAULT_DB_DSN.
 
-### Documentation
+### Swagger set up
 ```bash
 swag init --dir cmd/api --parseDependency --parseInternal --parseDepth 1
 ```
@@ -59,8 +59,50 @@ go run ./cmd/api
 
 ## To Run from the root directory
 1. Apply up migrations as above
-1. start the go server
-1. send client requests with ``curl``
+1. start the go server as above
+1. send client requests with ``curl``. Examples below
+
+### Example curl requests
+
+To create an example admin user locally:
+```bash
+curl -X POST \
+-H "Content-Type: application/json" \
+-d '{
+  "email": "user2@gmail.com",
+  "password": "password2",
+  "role": "Admin"
+}' \
+-w "\nHTTP Status: %{http_code}\n" \
+http://localhost:8080/api/v1/auth/register
+```
+To login the example admin user locally:
+```bash
+curl -X POST \
+-H "Content-Type: application/json" \
+-d '{
+  "email": "user2@gmail.com",
+  "password": "password2"
+}' \
+-c cookies.txt \
+-w "\nHTTP Status: %{http_code}\n" \
+http://localhost:8080/api/v1/auth/login
+```
+
+To create a book with the admin user locally:
+```bash
+curl -X POST \
+-H "Content-Type: application/json" \
+-d '{
+  "Author": "Author1",
+  "Title": "Title1",
+  "Price": 11
+}' \
+-b cookies.txt \
+-w "\nHTTP Status: %{http_code}\n" \
+http://localhost:8080/api/v1/books
+```
+``-b`` and ``-c`` flags are only necessary with ``curl`` to have a place to store the cookie locally. ``-b`` reads the cookie and ``-c`` reads the cookie from the specified file. The server creates and stores a cookie for each client.
 
 ## Testing
 ### Go Tests
@@ -95,5 +137,9 @@ drop table schema_migrations;
 select * from schema_migrations;
 ```
 
-## Ideas
+## Ideas/Plans
 - create a simulation of a big processing jobs by using a timer to wait for a random 1-5 second wait per "task" for 10 tasks to practice making a "/api/check/:jobid" endpoint to get the status of my job.
+- docker to containerize the api and database
+- more robust testing
+- look into terraform for practice with infrastructure as code
+- improve ci/cd pipeline to deploy after building and testing
