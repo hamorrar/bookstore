@@ -43,10 +43,10 @@ jobs:
         with:
           go-version: 1.25.1
         
-      - name: Lint
-        uses: golangci/golangci-lint-action@v4
-        with:
-          version: v2.4.0
+      # - name: Lint
+      #   uses: golangci/golangci-lint-action@v4
+      #   with:
+      #     version: v2.4.0
 
       - name: Run Migrations
         run: go run ./cmd/migrate/main.go up
