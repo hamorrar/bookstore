@@ -33,6 +33,9 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: 1.25.1
+      
+      - name: Debug
+        run: echo $DB_URL
 
       - name: Run Migrations
         run: go run ./cmd/migrate/main.go up
