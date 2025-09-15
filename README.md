@@ -1,5 +1,15 @@
 # bookstore
 
+## Summary
+A RESTful API to manage a bookstore with basic CRUD functionality for users, books, and orders. Role-based access for admin and customers. The backend service is written in Go, PostgreSQL for data storage, and Gin framework for routing and middleware. User authentication uses JWTs stored in secure cookies and middleware validates tokens and enforces role-based control. It includes a simple CI/CD pipeline with GitHub Actions to build and test the service. The API supports pagination Swagger is used for API documentation and can be seen at [localhost:8080/swagger](http://localhost:8080/swagger) when the server is running and in [./docs](./docs) for the json/yaml files.
+
+## Ideas/Plans
+- Create a simulation of a big processing jobs to practice making an endpoint to check on job status.
+- Use Docker to containerize the API and database.
+- More robust testing.
+- Look into how Terraform can be applied to the project for practice with infrastructure as code. Deploy product to AWS with Terraform.
+- Improve CI/CD pipeline after building and testing jobs finish. Add linting.
+
 ## Set Up
 
 ### Download source code with SSH
@@ -19,9 +29,10 @@ sudo apt-get update
 sudo apt-get install -y migrate
 ```
 
-### How to set up .env files
+### How to set up environment variables
 - Put ``.env`` file in ``/``.
-- Define DB_NAME, SECRET_KEY, DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, PORT, DB_URL, DEFAULT_DB_URL, DB_DSN, DEFAULT_DB_DSN.
+- Define DB_NAME, SECRET_KEY, DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, PORT, DB_URL, DB_DSN.
+- Put the SECRET_KEY and DB_PASSWORD in GitHub Secrets to reference in CI/CD workflow.
 
 ### Swagger set up
 ```bash
@@ -33,7 +44,7 @@ Might need to ``export PATH="$(go env GOPATH)/bin:$PATH"`` first.
 ```bash
 psql -U postgres -h localhost
 ```
-Add ``-d <DATABASE_NAME>`` to connect to a specific database.
+Add ``-d <DATABASE_NAME>`` to connect to a specific database. Ensure database is created before applying migrations below.
 
 ### Create migration files
 ```bash
@@ -136,10 +147,3 @@ drop table schema_migrations;
 ```sql
 select * from schema_migrations;
 ```
-
-## Ideas/Plans
-- create a simulation of a big processing jobs by using a timer to wait for a random 1-5 second wait per "task" for 10 tasks to practice making a "/api/check/:jobid" endpoint to get the status of my job.
-- docker to containerize the api and database
-- more robust testing
-- look into terraform for practice with infrastructure as code
-- improve ci/cd pipeline to deploy after building and testing
