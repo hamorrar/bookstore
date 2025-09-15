@@ -36,7 +36,8 @@ func main() {
 
 	err := godotenv.Load(".env")
 	if err != nil {
-		panic(err)
+		log.Printf("Error loading .env file for API: %v\n", err)
+		log.Println("No .env file found, relying on system environment for API.")
 	}
 
 	app := setupApp()

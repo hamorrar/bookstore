@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 
@@ -22,10 +21,11 @@ func main() {
 
 	err := godotenv.Load(".env")
 	if err != nil {
-		panic(err)
+		log.Printf("Error loading .env file for migrations: %v\n", err)
+		log.Println("No .env file found, relying on system environment for migrations.")
 	}
 
-	createDB()
+	// createDB()
 
 	DB_URL := os.Getenv("DB_URL")
 
@@ -65,37 +65,37 @@ func main() {
 	defer db.Close()
 }
 
-func createDB() {
-	// Open default "postgres" database to create bookstore database
-	DEFAULT_DB_DSN := os.Getenv("DEFAULT_DB_DSN")
+// func createDB() {
+// 	// Open default "postgres" database to create bookstore database
+// 	DEFAULT_DB_DSN := os.Getenv("DEFAULT_DB_DSN")
 
-	db, err := sql.Open("postgres", DEFAULT_DB_DSN)
-	if err != nil {
-		log.Fatal(err)
-	}
+// 	db, err := sql.Open("postgres", DEFAULT_DB_DSN)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
 
-	err = db.Ping()
-	if err != nil {
-		panic(err)
-	}
+// 	err = db.Ping()
+// 	if err != nil {
+// 		panic(err)
+// 	}
 
-	// Check if the prod/test database exists or needs to be created
-	DB_NAME := os.Getenv("DB_NAME")
+// 	// Check if the prod/test database exists or needs to be created
+// 	DB_NAME := os.Getenv("DB_NAME")
 
-	var exists bool
-	query := fmt.Sprintf("select exists(select 1 from pg_database where datname = '%s')", DB_NAME)
-	err = db.QueryRow(query).Scan(&exists)
-	if err != nil {
-		log.Fatalf("Error checking database existence: %v", err)
-	}
+// 	var exists bool
+// 	query := fmt.Sprintf("select exists(select 1 from pg_database where datname = '%s')", DB_NAME)
+// 	err = db.QueryRow(query).Scan(&exists)
+// 	if err != nil {
+// 		log.Fatalf("Error checking database existence: %v", err)
+// 	}
 
-	// Create the database if not exists
-	if !exists {
-		query := fmt.Sprintf("create database %s", DB_NAME)
-		_, err = db.Exec(query)
-		if err != nil {
-			log.Fatalf("Error creating database '%s': %v", DB_NAME, err)
-		}
-		fmt.Printf("Database '%s' created or already exists.\n", DB_NAME)
-	}
-}
+// 	// Create the database if not exists
+// 	if !exists {
+// 		query := fmt.Sprintf("create database %s", DB_NAME)
+// 		_, err = db.Exec(query)
+// 		if err != nil {
+// 			log.Fatalf("Error creating database '%s': %v", DB_NAME, err)
+// 		}
+// 		fmt.Printf("Database '%s' created or already exists.\n", DB_NAME)
+// 	}
+// }

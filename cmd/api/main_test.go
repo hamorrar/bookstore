@@ -28,8 +28,9 @@ func TestMain(m *testing.M) {
 		envPath := filepath.Join(rootPath, ".env")
 		if _, err := os.Stat(envPath); err == nil {
 			if err := godotenv.Load(envPath); err != nil {
-				log.Fatalf("Error loading .env file: %v", err)
+				log.Printf("Error loading .env file for TestMain: %v", err)
 			}
+			log.Printf("Env file found and loaded for testing: %s", envPath)
 			break
 		}
 		rootPath = filepath.Dir(rootPath)
